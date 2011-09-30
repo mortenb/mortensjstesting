@@ -14,7 +14,7 @@
          var game = function(canvas){
              //private properties / method:
 
-             var player1 = "white", player2 = "black";
+             var player1 = "black", player2 = "white";
 
              var player1Turn = true;
              var turnsPlayed = 0;
@@ -71,16 +71,16 @@
              for (j=-1; j<= 1; j++) {
                  x = width / 2 + i*6*stoneSize;
                  y = height / 2 + j*6*stoneSize;
-                 drawStone(false, x, y, 8);
+                 drawStone(true, x, y, 8);
              }
          }
 
-         function drawStone(isWhite, xPos, yPos, size) {
+         function drawStone(isBlack, xPos, yPos, size) {
              var ctx = $("#canvas")[0].getContext("2d");
-             if (isWhite) {
-                 ctx.fillStyle = "#FFF";
-             } else {
+             if (isBlack) {
                  ctx.fillStyle = "#000";
+             } else {
+                 ctx.fillStyle = "#FFF";
              }
              ctx.beginPath();
              ctx.arc(xPos, yPos, size, 0, Math.PI * 2, true);
