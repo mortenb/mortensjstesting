@@ -89,23 +89,25 @@
          }
 
          function putStoneInPosition(pos) {
-             if (isLegalPosition(pos)) {
-                var x = Math.floor(pos[0] / stoneSize);
-                     var y = Math.floor(pos[1] / stoneSize);
-                 legalPositions[x][y] = false;
-                 return true;
+             console.debug(pos[0] + "," + pos[1]);
+             var x = Math.floor(pos[0] / stoneSize);
+             var y = Math.floor(pos[1] / stoneSize);
+             if (isLegalPosition(x, y)) {
+                legalPositions[x][y] = false;
+                 drawStone(player1Turn, ( (x * stoneSize) + stoneSize /2), ( (y * stoneSize) + stoneSize /2), stoneSize/4);
+                 player1Turn = !player1Turn;
+                 if (player1Turn) {
+                    turnsPlayed ++;
+                 }
+                return true;
              }
              return false;
          }
 
-         function isLegalPosition(pos) {
-             var x = Math.floor(pos[0] / stoneSize);
-             var y = Math.floor(pos[1] / stoneSize);
-             console.debug(x + "," + y);
+         function isLegalPosition(x, y) {
              console.debug(legalPositions[x][y]);
              return legalPositions[x][y];
          }
-
 
              //end private
 
@@ -113,11 +115,7 @@
                  play : function(pos) {
                      console.log(pos);
                      if (putStoneInPosition(pos)) {
-                         drawStone(player1Turn, pos[0], pos[1], stoneSize/4);
-                         player1Turn = !player1Turn;
-                         if (player1Turn) {
-                            turnsPlayed ++;
-                         }
+
                         console.log("played");
                      }
                      else {
