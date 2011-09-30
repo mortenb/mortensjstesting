@@ -14,7 +14,7 @@
          var game = function(canvas){
              //private properties / method:
 
-             var player1 = "black", player2 = "white";
+             var player1 = "B", player2 = "W";
 
              var player1Turn = true;
              var turnsPlayed = 0;
@@ -29,15 +29,15 @@
 
          var numberOf = 19;
 
-         var legalPositions = [];
+         var occupiedPositions = [];
 
          for (var i = 0; i < numberOf; i++) {
-             legalPositions[i] = new Array(numberOf);
+             occupiedPositions[i] = new Array(numberOf);
          }
          for (i = 0; i < numberOf; i++) {
              for (var j = 0; j < numberOf; j++) {
 
-                 legalPositions[i][j] = true;
+                 occupiedPositions[i][j] = false;
              }
          }
 
@@ -93,7 +93,11 @@
              var x = Math.floor(pos[0] / stoneSize);
              var y = Math.floor(pos[1] / stoneSize);
              if (isLegalPosition(x, y)) {
-                legalPositions[x][y] = false;
+                 if (player1Turn) {
+                     occupiedPositions[x][y] = player1;
+                 } else {
+                     occupiedPositions[x][y] = player2;
+                 }
                  drawStone(player1Turn, ( (x * stoneSize) + stoneSize /2), ( (y * stoneSize) + stoneSize /2), stoneSize/4);
                  player1Turn = !player1Turn;
                  if (player1Turn) {
@@ -105,8 +109,9 @@
          }
 
          function isLegalPosition(x, y) {
-             console.debug(legalPositions[x][y]);
-             return legalPositions[x][y];
+             console.debug(occupiedPositions[x][y]);
+             //I guess we need to handle the ko rule and playing stones with no liberty too but this will do for now..
+             return !occupiedPositions[x][y];
          }
 
              //end private
@@ -124,7 +129,7 @@
                  },
 
                  getLegalPositions : function() {
-                    return legalPositions;
+                    return occupiedPositions;
                  },
 
                  getStoneSize : function() {
