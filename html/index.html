@@ -30,17 +30,17 @@
          var numberOf = 19;
 
          var legalPositions = [];
-         var boardPositions = [];
 
-             //var l = legalXPositions.length; //optimize, do not get this for every iteration in loop
+         for (var i = 0; i < numberOf; i++) {
+             legalPositions[i] = new Array(numberOf);
+         }
+         for (i = 0; i < numberOf; i++) {
+             for (var j = 0; j < numberOf; j++) {
 
-             for (i = 0; i < numberOf; i++) {
-                 for (j = 0; j < numberOf; j++) {
-                     var y = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18];
-                     legalPositions[i] = y;
-                     legalPositions[i][j] = true;
-                 }
+                 legalPositions[i][j] = true;
              }
+         }
+
          var ctx = canvas[0].getContext("2d");
          ctx.beginPath();
          ctx.fillStyle = "#ea0"; //bordfarge
