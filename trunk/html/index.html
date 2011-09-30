@@ -1,0 +1,170 @@
+ <!DOCTYPE html>
+ <html lang="en">
+ <head>
+   <meta charset="utf-8">
+   <title>Go go!</title>
+ </head>
+ <body>
+   
+   <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.5/jquery.min.js"></script>
+   <script>
+     $(document).ready(function(){
+//       $("canvas").css("backgroundColor", "blue");
+
+         var game = function(canvas){
+             //private properties / method:
+
+             var player1 = "white", player2 = "black";
+
+             var player1Turn = true;
+             var turnsPlayed = 0;
+
+             var player1Points = 0;
+             var player2Points = 0;
+
+
+         var width = 950;
+         var height = width;
+         var stoneSize = width / 19;
+
+         var numberOf = 19;
+
+         var legalPositions = [];
+         var boardPositions = [];
+
+             //var l = legalXPositions.length; //optimize, do not get this for every iteration in loop
+
+             for (i = 0; i < numberOf; i++) {
+                 for (j = 0; j < numberOf; j++) {
+                     var y = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18];
+                     legalPositions[i] = y;
+                     legalPositions[i][j] = true;
+                 }
+             }
+         var ctx = canvas[0].getContext("2d");
+         ctx.beginPath();
+         ctx.fillStyle = "#ea0"; //bordfarge
+         ctx.fillRect(0,0,width, height);
+         ctx.strokeStyle = "#000";
+         ctx.lineWidth = 4;
+
+         for (i = 0; i <= numberOf; i++) { //make rutetabell
+            ctx.beginPath();
+             var x = stoneSize / 2;
+             var y = (stoneSize / 2) + stoneSize * i;
+            ctx.moveTo(x, y);
+            ctx.lineTo((width - stoneSize /2), (stoneSize / 2) + stoneSize * i);
+             ctx.stroke();
+             ctx.closePath();
+
+            ctx.beginPath();
+            ctx.moveTo( (stoneSize / 2) + stoneSize * i, (stoneSize / 2) );
+            ctx.lineTo((stoneSize / 2) + stoneSize * i, height - (stoneSize / 2) );
+             ctx.stroke();
+             ctx.closePath();
+
+
+         }
+
+         //make black dots on the board
+         for (i=-1; i<= 1; i++) {
+             for (j=-1; j<= 1; j++) {
+                 x = width / 2 + i*6*stoneSize;
+                 y = height / 2 + j*6*stoneSize;
+                 drawStone(false, x, y, 8);
+             }
+         }
+
+         function drawStone(isWhite, xPos, yPos, size) {
+             var ctx = $("#canvas")[0].getContext("2d");
+             if (isWhite) {
+                 ctx.fillStyle = "#FFF";
+             } else {
+                 ctx.fillStyle = "#000";
+             }
+             ctx.beginPath();
+             ctx.arc(xPos, yPos, size, 0, Math.PI * 2, true);
+             ctx.closePath();
+             ctx.fill();
+         }
+
+         function putStoneInPosition(pos) {
+             if (isLegalPosition(pos)) {
+                var x = Math.floor(pos[0] / stoneSize);
+                     var y = Math.floor(pos[1] / stoneSize);
+                 legalPositions[x][y] = false;
+                 return true;
+             }
+             return false;
+         }
+
+         function isLegalPosition(pos) {
+             var x = Math.floor(pos[0] / stoneSize);
+             var y = Math.floor(pos[1] / stoneSize);
+             console.debug(x + "," + y);
+             console.debug(legalPositions[x][y]);
+             return legalPositions[x][y];
+         }
+
+
+             //end private
+
+             return {
+                 play : function(pos) {
+                     console.log(pos);
+                     if (putStoneInPosition(pos)) {
+                         drawStone(player1Turn, pos[0], pos[1], stoneSize/4);
+                         player1Turn = !player1Turn;
+                         if (player1Turn) {
+                            turnsPlayed ++;
+                         }
+                        console.log("played");
+                     }
+                     else {
+                         console.log("Illegal position!")
+                     }
+                 },
+
+                 getLegalPositions : function() {
+                    return legalPositions;
+                 },
+
+                 getStoneSize : function() {
+                     return stoneSize;
+                 }
+             }
+         }
+
+         var canvas = $("#canvas");
+         var myGame = game(canvas);
+
+         canvas.mousemove(function(e){
+             pos = getCursorPosition(this, e);
+             $("#debugger").html(pos[0] + ", " + pos[1]);
+         }).mouseup(function(e){
+             pos = getCursorPosition(this, e);
+             myGame.play(pos);
+         });
+
+
+
+
+
+         function getCursorPosition(canvas, event) {
+            var x, y;
+            canoffset = $(canvas).offset();
+            x = event.clientX + document.body.scrollLeft + document.documentElement.scrollLeft - Math.floor(canoffset.left);
+            y = event.clientY + document.body.scrollTop + document.documentElement.scrollTop - Math.floor(canoffset.top) + 1;
+            //alert(x + ", " + y);
+            return [x,y];
+        }
+
+     });
+   </script>
+    <div id="debugger"></div>
+ <canvas width="950" height="950" id="canvas">
+
+     
+ </canvas>
+ </body>
+ </html>
