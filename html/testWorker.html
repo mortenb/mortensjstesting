@@ -1,0 +1,36 @@
+<html>
+<body>
+<h1>Web Workers </h1>
+                -Mulighet for å threade ut egne scripts!
+<h2>Eksempel 2 - med web workers!</h2>
+                <section class="codeView">
+                      <button onclick="sayHI()">Say HI</button>
+                    <button id="prime" onclick='primes()'>Primtall</button>
+                    <div id="result"></div>
+                    <script type="text/javascript">
+
+
+var w = new Worker('worker.js');
+ w.addEventListener('message', function(e) {
+                                                       document.getElementById('result').textContent = e.data;
+                                                     }, false);
+                        function primes() {
+
+
+
+                            w.postMessage({'cmd': 'start', 'stop': '1000000'});
+                        }
+
+
+                        function sayHI() {
+                            alert("HI");
+                        }
+
+
+                       
+
+
+                    </script>
+                    </section>
+</body>
+                    </html>
