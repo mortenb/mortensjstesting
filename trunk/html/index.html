@@ -9,76 +9,72 @@
    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.5/jquery.min.js"></script>
    <script>
      $(document).ready(function(){
-//       $("canvas").css("backgroundColor", "blue");
 
-         var game = function(canvas){
-             //private properties / method:
+        var game = function(canvas){
+        //private properties / methods:
 
-             var player1 = "B", player2 = "W";
+        var player1 = "B", player2 = "W";
+        var player1Turn = true;
+        var turnsPlayed = 0;
+        var player1Points = 0;
+        var player2Points = 0;
 
-             var player1Turn = true;
-             var turnsPlayed = 0;
+        var numberOf = 19;
 
-             var player1Points = 0;
-             var player2Points = 0;
+        var width = canvas.width();
+        var height = canvas.height();
 
-             var numberOf = 19;
+        var stoneWidth = width / numberOf;
+        var stoneHeigth = height / numberOf;
 
-            var width = canvas.width();
-         var height = canvas.height();
+//        var stone = function(pos) {
+//            var position = pos;
+//            var N, S, W, E;
+//
+//        }
+        var occupiedPositions = [];
 
-         var stoneWidth = width / numberOf;
-         var stoneHeigth = height / numberOf;
-
-
-
-         var occupiedPositions = [];
-
-         for (var i = 0; i < numberOf; i++) {
-             occupiedPositions[i] = new Array(numberOf);
-         }
-         for (i = 0; i < numberOf; i++) {
-             for (var j = 0; j < numberOf; j++) {
-
+        for (var i = 0; i < numberOf; i++) {
+            occupiedPositions[i] = new Array(numberOf);
+        }
+        for (i = 0; i < numberOf; i++) {
+            for (var j = 0; j < numberOf; j++) {
                  occupiedPositions[i][j] = false;
-             }
-         }
+            }
+        }
 
-         var ctx = canvas[0].getContext("2d");
-         ctx.beginPath();
-         ctx.fillStyle = "#ea0"; //bordfarge
-         ctx.fillRect(0,0,width, height);
-         ctx.strokeStyle = "#000";
-         ctx.lineWidth = 4;
+        var ctx = canvas[0].getContext("2d");
+        ctx.beginPath();
+        ctx.fillStyle = "#ea0"; //bordfarge
+        ctx.fillRect(0,0,width, height);
+        ctx.strokeStyle = "#000";
+        ctx.lineWidth = 4;
 
-         for (i = 0; i <= numberOf; i++) { //make rutetabell
+        for (i = 0; i <= numberOf; i++) { //make rutetabell
             ctx.beginPath();
-             var x = stoneWidth / 2;
-             var y = (stoneHeigth / 2) + stoneHeigth * i;
+            var x = stoneWidth / 2;
+            var y = (stoneHeigth / 2) + stoneHeigth * i;
             ctx.moveTo(x, y);
             ctx.lineTo((width - stoneWidth /2), (stoneHeigth / 2) + stoneHeigth * i);
-             ctx.stroke();
-             ctx.closePath();
-
+            ctx.stroke();
+            ctx.closePath();
             ctx.beginPath();
             ctx.moveTo( (stoneWidth / 2) + stoneWidth * i, (stoneHeigth / 2) );
             ctx.lineTo((stoneWidth / 2) + stoneWidth * i, height - (stoneHeigth / 2) );
-             ctx.stroke();
-             ctx.closePath();
-
-
+            ctx.stroke();
+            ctx.closePath();
          }
 
          //make black dots on the board
-         for (i=-1; i<= 1; i++) {
+        for (i=-1; i<= 1; i++) {
              for (j=-1; j<= 1; j++) {
                  x = width / 2 + i*6*stoneWidth;
                  y = height / 2 + j*6*stoneHeigth;
                  drawStone(true, x, y, 8);
              }
-         }
+        }
 
-         function drawStone(isBlack, xPos, yPos, size) {
+        function drawStone(isBlack, xPos, yPos, size) {
              var ctx = $("#canvas")[0].getContext("2d");
              if (isBlack) {
                  ctx.fillStyle = "#000";
@@ -89,9 +85,9 @@
              ctx.arc(xPos, yPos, size, 0, Math.PI * 2, true);
              ctx.closePath();
              ctx.fill();
-         }
+        }
 
-         function putStoneInPosition(pos) {
+        function putStoneInPosition(pos) {
              console.debug(pos[0] + "," + pos[1]);
              var x = Math.floor(pos[0] / stoneWidth);
              var y = Math.floor(pos[1] / stoneHeigth);
@@ -106,40 +102,82 @@
                  if (player1Turn) {
                     turnsPlayed ++;
                  }
+                 checkCaptured();
                 return true;
              }
              return false;
-         }
+        }
 
-         function isLegalPosition(x, y) {
+        function isLegalPosition(x, y) {
              console.debug(occupiedPositions[x][y]);
              //I guess we need to handle the ko rule and playing stones with no liberty too but this will do for now..
              return !occupiedPositions[x][y];
-         }
+        }
 
+        function checkCaptured() {
+            //loop through all positions, check that every stone has at least one free eye.
+            //First stab, now it only works on single stones, not connected ones. 
+            var maxEyes = 4;
+            for (i = 0; i < numberOf; i++) {
+                for (j = 0; j < numberOf; j++) {
+                    if (!occupiedPositions[i][j]) {
+                        continue; //try the next position if this is free
+                    }
+                    var color = occupiedPositions[i][j];
+                    console.log(color + " at [" + i + ", " + j +"]" );
+                    var eyes = [j-1, j+1, i-1, i+1];
+                    var hasEye = false;
+                    var value;
+                    for (var e = 0; e < maxEyes; e++) {
+                        var n = eyes[e];
+                        console.log(eyes[e]);
+                        if (occupiedPositions[i][n] == undefined) {
+                            continue;
+                        }
+                        if (e < 2) {
+                            value = occupiedPositions[i][n];
+                        } else {
+                            value = occupiedPositions[n][j];
+                        }
+                        console.log(value);
+                        if (!value) { // some neighbour is not occupied, OK GO!
+                            console.log("found neighbour at [" + i + ", " + n +"]");
+                            break;
+                        }
+                        if (value == color) {
+                            break;
+                        }
+                        if (e == maxEyes -1) {
+                            console.log("[" + i + ", " + j +"] captured");
+                            occupiedPositions[i][j] = true; //Should this be WC for white capture or BC black capture?
+                        }
+                    }
+                }
+
+            }
+        }
              //end private
 
-             return {
-                 play : function(pos) {
-                     console.log(pos);
-                     if (putStoneInPosition(pos)) {
-
-                        console.log("played");
-                     }
-                     else {
-                         console.log("Illegal position!")
-                     }
-                 },
-
-                 getLegalPositions : function() {
-                    return occupiedPositions;
-                 },
-
-                 getStoneSize : function() {
-                     return stoneWidth;
+        return {
+             play : function(pos) {
+                 console.log(pos);
+                 if (putStoneInPosition(pos)) {
+                    console.log("played");
                  }
+                 else {
+                     console.log("Illegal position!")
+                 }
+             },
+
+             getLegalPositions : function() {
+                return occupiedPositions;
+             },
+
+             getStoneSize : function() {
+                 return stoneWidth;
              }
          }
+        }
 
          var canvas = $("#canvas");
          var myGame = game(canvas);
