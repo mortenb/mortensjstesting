@@ -25,14 +25,14 @@
         var height = canvas.height();
 
         //init all positions to not occupied!
-        var occupiedPositions = [];
+        var positions = [];
 
         for (var i = 0; i < numberOf; i++) {
-            occupiedPositions[i] = new Array(numberOf);
+            positions[i] = new Array(numberOf);
         }
         for (i = 0; i < numberOf; i++) {
             for (var j = 0; j < numberOf; j++) {
-                 occupiedPositions[i][j] = false;
+                 positions[i][j] = false;
             }
         }
 
@@ -80,7 +80,7 @@
              //draw stones in play based on the positions array:
              for (i = 0; i < numberOf; i++) {
                 for (var j = 0; j < numberOf; j++) {
-                    var val = occupiedPositions[i][j];
+                    var val = positions[i][j];
                     if (val) {
                         boardPos = convertPositionToActualBoardPosition([i,j], stoneWidth, stoneHeigth);
                         drawStone((val == "B"), boardPos[0], boardPos[1], stoneWidth/4);
@@ -90,7 +90,7 @@
 
         }
             
-        drawBoard(canvas, numberOf, occupiedPositions);
+        drawBoard(canvas, numberOf, positions);
 
 
         function convertPositionToActualBoardPosition(pos, stoneWidth, stoneHeigth) {
@@ -118,9 +118,9 @@
              var y = Math.floor(pos[1] / stoneHeigth);
              if (isLegalPosition(x, y)) {
                  if (player1Turn) {
-                     occupiedPositions[x][y] = player1;
+                     positions[x][y] = player1;
                  } else {
-                     occupiedPositions[x][y] = player2;
+                     positions[x][y] = player2;
                  }
                  var boardPos = convertPositionToActualBoardPosition([x,y], stoneWidth, stoneHeigth);
                  drawStone(player1Turn, boardPos[0], boardPos[1], stoneWidth/4);
@@ -129,46 +129,50 @@
                     turnsPlayed ++;
                  }
                  checkCaptured();
-                 drawBoard(canvas, numberOf, occupiedPositions);
+                 drawBoard(canvas, numberOf, positions);
                 return true;
              }
              return false;
         }
 
         function isLegalPosition(x, y) {
-             console.debug(occupiedPositions[x][y]);
+             console.debug(positions[x][y]);
              //I guess we need to handle the ko rule and playing stones with no liberty too but this will do for now..
-             return !occupiedPositions[x][y];
+             return !positions[x][y];
         }
 
         function checkCaptured() {
             //loop through all positions, check that every stone has at least one free eye.
             //First stab, now it only works on single stones, not connected ones. 
             var maxEyes = 4;
+            var color;
+            var eyes;
+            var value;
             for (i = 0; i < numberOf; i++) {
                 for (j = 0; j < numberOf; j++) {
-                    if (!occupiedPositions[i][j]) {
+                    if (!positions[i][j]) {
                         continue; //try the next position if this is free
                     }
-                    var color = occupiedPositions[i][j];
+                    color = positions[i][j];
                     console.log(color + " at [" + i + ", " + j +"]" );
-                    var eyes = [j-1, j+1, i-1, i+1];
-                    var hasEye = false;
-                    var value;
+                    eyes = [j-1, j+1, i-1, i+1];
                     for (var e = 0; e < maxEyes; e++) {
                         var n = eyes[e];
                         console.log(eyes[e]);
-                        if (occupiedPositions[i][n] == undefined) {
+                        if (positions[i][n] == undefined) {
+                            console.log("corner");
                             continue;
                         }
                         if (e < 2) {
-                            value = occupiedPositions[i][n];
+                            value = positions[i][n];
+                            console.log(i + ", " + n);
                         } else {
-                            value = occupiedPositions[n][j];
+                            value = positions[n][j];
+                            console.log(n + ", " + j);
                         }
                         console.log(value);
                         if (!value) { // some neighbour is not occupied, OK GO!
-                            console.log("found neighbour at [" + i + ", " + n +"]");
+                            console.log("found free spot");
                             break;
                         }
                         if (value == color) {
@@ -176,7 +180,7 @@
                         }
                         if (e == maxEyes -1) {
                             console.log("[" + i + ", " + j +"] captured");
-                            occupiedPositions[i][j] = false; //Should this be WC for white capture or BC black capture?
+                            positions[i][j] = false; //Should this be WC for white capture or BC black capture?
                         }
                     }
                 }
@@ -197,7 +201,7 @@
              },
 
              getLegalPositions : function() {
-                return occupiedPositions;
+                return positions;
              },
 
              getStoneSize : function() {
