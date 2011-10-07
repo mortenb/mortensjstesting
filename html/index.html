@@ -83,7 +83,7 @@
                     var val = positions[i][j];
                     if (val) {
                         boardPos = convertPositionToActualBoardPosition([i,j], stoneWidth, stoneHeigth);
-                        drawStone((val == "B"), boardPos[0], boardPos[1], stoneWidth/4);
+                        drawStone((val == "B"), boardPos[0], boardPos[1], stoneWidth/2.5);
                     }
                 }
              }
@@ -161,17 +161,18 @@
                         console.log(eyes[e]);
                         if (positions[i][n] == undefined) {
                             console.log("corner");
-                            continue;
-                        }
-                        if (e < 2) {
-                            value = positions[i][n];
-                            console.log(i + ", " + n);
+                            value = undefined;
                         } else {
-                            value = positions[n][j];
-                            console.log(n + ", " + j);
+                            if (e < 2) {
+                                value = positions[i][n];
+                                console.log(i + ", " + n);
+                            } else {
+                                value = positions[n][j];
+                                console.log(n + ", " + j);
+                            }
                         }
                         console.log(value);
-                        if (!value) { // some neighbour is not occupied, OK GO!
+                        if (value != undefined && !value) { // some neighbour is not occupied, OK GO!
                             console.log("found free spot");
                             break;
                         }
