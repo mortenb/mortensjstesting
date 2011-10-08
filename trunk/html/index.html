@@ -152,7 +152,6 @@ $(document).ready(function() {
             var x = Math.floor(pos[0] / stoneWidth);
             var y = Math.floor(pos[1] / stoneHeigth);
             if (isLegalPosition(x, y)) {
-
                 // place stone
                 if (player1Turn) {
                     positions[x][y] = player1;
@@ -181,7 +180,13 @@ $(document).ready(function() {
         function isLegalPosition(x, y) {
             console.debug(positions[x][y]);
             //I guess we need to handle the ko rule and playing stones with no liberty too but this will do for now..
-            return !positions[x][y];
+            if  (positions[x][y]) { // check if position is occupied
+                return false;
+            }
+            if (isSuicide(x,y)) {
+                return false;
+            }
+            return true;
         }
 
         function enemy(player) {
@@ -224,6 +229,22 @@ $(document).ready(function() {
             return true;
         }
 
+        function isCaptured(x, y, player){
+            // returns true if the stone at x,y belongs to player and is surrounded
+            clearPositionChecked();
+            if(isBlocked(x, y, player)){
+                for (i = 0; i < numberOf; i++) {
+                    for (var j = 0; j < numberOf; j++) {
+                        if(positionChecked[i][j]){
+                            return true;
+                        }
+
+                    }
+                }
+            }
+            return false
+        }
+
         function captureStones() {
             // remove marked stones from board and add points to player
             for (var i = 0; i < numberOf; i++) {
@@ -245,21 +266,41 @@ $(document).ready(function() {
         function checkCaptured(x, y) {
             // check if placing a stone at position x,y manages to surround any of the other players stones
             // if it does then
-            var player = enemy(positions[x][y]);
+            var otherPlayer = enemy(positions[x][y]);
 
             clearPositionChecked();
-            if (isBlocked(x + 1, y, player))
+            if (isBlocked(x + 1, y, otherPlayer))
                 captureStones();
             clearPositionChecked();
-            if (isBlocked(x - 1, y, player))
+            if (isBlocked(x - 1, y, otherPlayer))
                 captureStones();
             clearPositionChecked();
-            if (isBlocked(x, y + 1, player))
+            if (isBlocked(x, y + 1, otherPlayer))
                 captureStones();
             clearPositionChecked();
-            if (isBlocked(x, y - 1, player))
+            if (isBlocked(x, y - 1, otherPlayer))
                 captureStones();
         }
+
+        function isSuicide(x, y) {
+            // check if placing a stone at position x,y is suicide
+            var retVal = false;
+            var player = player1Turn?player1:player2;
+            var otherPlayer = enemy(player);
+            // place stone for testing
+            positions[x][y] = player;
+            // check if placing stone is blocked and does not capture any of the other players stones
+            if ( isBlocked(x, y, player) &&
+                 !isCaptured(x + 1, y, otherPlayer) && !isCaptured(x - 1, y, otherPlayer) &&
+                 !isCaptured(x, y + 1, otherPlayer) && !isCaptured(x, y + 1, otherPlayer) )
+                retVal =  true; // this is suicide
+
+            // remove test-stone
+            positions[x][y] = false;
+
+            return retVal;
+        }
+
         function updateScoreBoard() {
             if (player1Turn) {
                 currentPlayer = "Black's";
