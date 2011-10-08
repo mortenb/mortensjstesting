@@ -4,6 +4,29 @@
     <meta charset="utf-8">
     <title>Go go!</title>
 </head>
+<style>
+    #debugger {
+        display: none;
+    }
+    #error {
+        color: red;
+    }
+    #scoreboard {
+         padding: 10px;
+        display: inline-block;
+    }
+    #black {
+        padding: 10px;
+        float: left;
+    }
+    #white {
+         padding: 10px;
+        float: right;
+    }
+    #turn {
+         padding: 10px;
+    }
+</style>
 <body>
 
 <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.5/jquery.min.js"></script>
@@ -236,7 +259,23 @@ $(document).ready(function() {
             clearPositionChecked();
             if (isBlocked(x, y - 1, player))
                 captureStones();
-        }//end private
+        }
+        function updateScoreBoard() {
+            if (player1Turn) {
+                currentPlayer = "Black's";
+            } else {
+                currentPlayer = "White's";
+            }
+            $("#blackPoints").text(player1Points);
+            $("#whitePoints").text(player2Points);
+            $("#playerTurn").text(currentPlayer);
+            showError("");
+        }
+        function showError(errorMsg) {
+            $("#error").text(errorMsg);
+        }
+
+        //end private
 
 
         return {
@@ -244,17 +283,12 @@ $(document).ready(function() {
                 console.log(pos);
                 if (putStoneInPosition(pos)) {
                     var currentPlayer = ""
-                    if (player1Turn) {
-                        currentPlayer = "black";
-                    } else {
-                        currentPlayer = "white";
-                    }
-                    alert("Next player: " + currentPlayer + "\nturn#: " + turnsPlayed + "\nPoints black = " + player1Points + "  white = " + player2Points)
+                    updateScoreBoard();
                     console.log("played");
                 }
                 else {
-                    alert("illegal move")
-                    console.log("Illegal position!")
+                    showError("illegal move!");
+                    console.log("Illegal position!");
                 }
             },
 
@@ -293,6 +327,21 @@ $(document).ready(function() {
 });
 </script>
 <div id="debugger"></div>
+<div id="scoreboard">
+ <div id="black">
+     Black : <span id="blackPoints"> 0 </span> points
+ </div>
+ <div id="turn">
+     <span id="playerTurn">Black's</span> turn
+ </div>
+ <div id="white">
+     White : <span id="whitePoints"> 0 </span> points
+ </div>
+
+</div>
+<div id="error">
+
+</div>
 <div id="board">
     <canvas width="950" height="950" id="canvas"/>
 </div>
