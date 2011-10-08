@@ -1,16 +1,16 @@
- <!DOCTYPE html>
- <html lang="en">
- <head>
-   <meta charset="utf-8">
-   <title>Go go!</title>
- </head>
- <body>
-   
-   <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.5/jquery.min.js"></script>
-   <script>
-     $(document).ready(function(){
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Go go!</title>
+</head>
+<body>
 
-        var game = function(canvas){
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.5/jquery.min.js"></script>
+<script>
+$(document).ready(function() {
+
+    var game = function(canvas) {
         //private properties / methods:
 
         var player1 = "B", player2 = "W";
@@ -32,24 +32,36 @@
         }
         for (i = 0; i < numberOf; i++) {
             for (var j = 0; j < numberOf; j++) {
-                 positions[i][j] = false;
+                positions[i][j] = false;
             }
         }
+
+        //create positionChecked 2d array!
+        var positionChecked = []; // Used during checking for surrounded stones
+
+        for (var i = 0; i < numberOf; i++) {
+            positionChecked[i] = new Array(numberOf);
+        }
+
+        function clearPositionChecked() {
+            for (i = 0; i < numberOf; i++) {
+                for (var j = 0; j < numberOf; j++) {
+                    positionChecked[i][j] = false;
+                }
+            }
+        }
+
+        //init all positionChecked marks to not checked!
+        clearPositionChecked();
 
         var stoneWidth = width / numberOf;
         var stoneHeigth = height / numberOf;
 
-//        var stone = function(pos) {
-//            var position = pos;
-//            var N, S, W, E;
-//
-//        }
-
-         function drawBoard(canvas, numberOf, positions) {
+        function drawBoard(canvas, numberOf, positions) {
             var ctx = canvas[0].getContext("2d");
             ctx.beginPath();
             ctx.fillStyle = "#ea0"; //bordfarge
-            ctx.fillRect(0,0,width, height);
+            ctx.fillRect(0, 0, width, height);
             ctx.strokeStyle = "#000";
             ctx.lineWidth = 4;
 
@@ -58,190 +70,233 @@
                 var x = stoneWidth / 2;
                 var y = (stoneHeigth / 2) + stoneHeigth * i;
                 ctx.moveTo(x, y);
-                ctx.lineTo((width - stoneWidth /2), (stoneHeigth / 2) + stoneHeigth * i);
+                ctx.lineTo((width - stoneWidth / 2), (stoneHeigth / 2) + stoneHeigth * i);
                 ctx.stroke();
                 ctx.closePath();
                 ctx.beginPath();
-                ctx.moveTo( (stoneWidth / 2) + stoneWidth * i, (stoneHeigth / 2) );
-                ctx.lineTo((stoneWidth / 2) + stoneWidth * i, height - (stoneHeigth / 2) );
+                ctx.moveTo((stoneWidth / 2) + stoneWidth * i, (stoneHeigth / 2));
+                ctx.lineTo((stoneWidth / 2) + stoneWidth * i, height - (stoneHeigth / 2));
                 ctx.stroke();
                 ctx.closePath();
-             }
-
-             //make black dots on the board
-            for (i=-1; i<= 1; i++) {
-                 for (j=-1; j<= 1; j++) {
-                     x = width / 2 + i*6*stoneWidth;
-                     y = height / 2 + j*6*stoneHeigth;
-                     drawStone(true, x, y, 8);
-                 }
             }
 
-             //draw stones in play based on the positions array:
-             for (i = 0; i < numberOf; i++) {
+            //make black dots on the board
+            for (i = -1; i <= 1; i++) {
+                for (j = -1; j <= 1; j++) {
+                    x = width / 2 + i * 6 * stoneWidth;
+                    y = height / 2 + j * 6 * stoneHeigth;
+                    drawStone(true, x, y, 8);
+                }
+            }
+
+            //draw stones in play based on the positions array:
+            for (i = 0; i < numberOf; i++) {
                 for (var j = 0; j < numberOf; j++) {
                     var val = positions[i][j];
                     if (val) {
                         boardPos = convertPositionToActualBoardPosition([i,j], stoneWidth, stoneHeigth);
-                        drawStone((val == "B"), boardPos[0], boardPos[1], stoneWidth/2.5);
+                        drawStone((val == "B"), boardPos[0], boardPos[1], stoneWidth / 2.5);
                     }
                 }
-             }
+            }
 
         }
-            
+
         drawBoard(canvas, numberOf, positions);
 
 
         function convertPositionToActualBoardPosition(pos, stoneWidth, stoneHeigth) {
             var x = pos[0];
             var y = pos[1];
-            return [ ((x * stoneWidth) + stoneWidth /2), ( (y * stoneHeigth) + stoneHeigth /2)];
+            return [ ((x * stoneWidth) + stoneWidth / 2), ( (y * stoneHeigth) + stoneHeigth / 2)];
         }
 
         function drawStone(isBlack, xPos, yPos, size) {
-             var ctx = $("#canvas")[0].getContext("2d");
-             if (isBlack) {
-                 ctx.fillStyle = "#000";
-             } else {
-                 ctx.fillStyle = "#FFF";
-             }
-             ctx.beginPath();
-             ctx.arc(xPos, yPos, size, 0, Math.PI * 2, true);
-             ctx.closePath();
-             ctx.fill();
+            var ctx = $("#canvas")[0].getContext("2d");
+            if (isBlack) {
+                ctx.fillStyle = "#000";
+            } else {
+                ctx.fillStyle = "#FFF";
+            }
+            ctx.beginPath();
+            ctx.arc(xPos, yPos, size, 0, Math.PI * 2, true);
+            ctx.closePath();
+            ctx.fill();
         }
 
         function putStoneInPosition(pos) {
-             console.debug(pos[0] + "," + pos[1]);
-             var x = Math.floor(pos[0] / stoneWidth);
-             var y = Math.floor(pos[1] / stoneHeigth);
-             if (isLegalPosition(x, y)) {
-                 if (player1Turn) {
-                     positions[x][y] = player1;
-                 } else {
-                     positions[x][y] = player2;
-                 }
-                 var boardPos = convertPositionToActualBoardPosition([x,y], stoneWidth, stoneHeigth);
-                 drawStone(player1Turn, boardPos[0], boardPos[1], stoneWidth/4);
-                 player1Turn = !player1Turn;
-                 if (player1Turn) {
+            console.debug(pos[0] + "," + pos[1]);
+            var x = Math.floor(pos[0] / stoneWidth);
+            var y = Math.floor(pos[1] / stoneHeigth);
+            if (isLegalPosition(x, y)) {
+
+                // place stone
+                if (player1Turn) {
+                    positions[x][y] = player1;
+                } else {
+                    positions[x][y] = player2;
+                }
+                //var boardPos = convertPositionToActualBoardPosition([x,y], stoneWidth, stoneHeigth);
+                //drawStone(player1Turn, boardPos[0], boardPos[1], stoneWidth/4);
+
+                // capture stones
+                checkCaptured(x, y);
+
+                // switch turn
+                player1Turn = !player1Turn;
+                if (player1Turn) {
                     turnsPlayed ++;
-                 }
-                 checkCaptured();
-                 drawBoard(canvas, numberOf, positions);
+                }
+
+                // update screen
+                drawBoard(canvas, numberOf, positions);
                 return true;
-             }
-             return false;
+            }
+            return false;
         }
 
         function isLegalPosition(x, y) {
-             console.debug(positions[x][y]);
-             //I guess we need to handle the ko rule and playing stones with no liberty too but this will do for now..
-             return !positions[x][y];
+            console.debug(positions[x][y]);
+            //I guess we need to handle the ko rule and playing stones with no liberty too but this will do for now..
+            return !positions[x][y];
         }
 
-        function checkCaptured() {
-            //loop through all positions, check that every stone has at least one free eye.
-            //First stab, now it only works on single stones, not connected ones. 
-            var maxEyes = 4;
-            var color;
-            var eyes;
-            var value;
-            for (i = 0; i < numberOf; i++) {
-                for (j = 0; j < numberOf; j++) {
-                    if (!positions[i][j]) {
-                        continue; //try the next position if this is free
-                    }
-                    color = positions[i][j];
-                    console.log(color + " at [" + i + ", " + j +"]" );
-                    eyes = [j-1, j+1, i-1, i+1];
-                    for (var e = 0; e < maxEyes; e++) {
-                        var n = eyes[e];
-                        console.log(eyes[e]);
-                        if (positions[i][n] == undefined) {
-                            console.log("corner");
-                            value = undefined;
+        function enemy(player) {
+            // returns the other player
+            if (player == player1)
+                return player2;
+            else
+                return player1;
+        }
+
+        function isBlocked(x, y, player) {
+            // recursive function to check if a position is blocked
+            // if the position is occupied by the the current player the surrounding positions are checked
+
+            // check if blocked by borders
+            if (x < 0 || y < 0 || x >= numberOf || y >= numberOf)
+                return true;
+            // check if position has already been marked as checked
+            if (positionChecked[x][y])
+                return true;
+            // check if position is free
+            if (positions[x][y] == false)
+                return false;
+            // check if position is blocked the other player
+            if (positions[x][y] == enemy(player))
+                return true;
+
+            // mark this position to prevent re-checking
+            positionChecked[x][y] = true;
+
+            // check surrounding positions
+            if (!isBlocked(x - 1, y, player))
+                return false;
+            if (!isBlocked(x + 1, y, player))
+                return false;
+            if (!isBlocked(x, y - 1, player))
+                return false;
+            if (!isBlocked(x, y + 1, player))
+                return false;
+            return true;
+        }
+
+        function captureStones() {
+            // remove marked stones from board and add points to player
+            for (var i = 0; i < numberOf; i++) {
+                for (var j = 0; j < numberOf; j++) {
+                    if (positionChecked[i][j]) {
+                        // remove stone
+                        positions[i][j] = false;
+                        // add to score
+                        if (player1Turn) {
+                            player1Points++;
                         } else {
-                            if (e < 2) {
-                                value = positions[i][n];
-                                console.log(i + ", " + n);
-                            } else {
-                                value = positions[n][j];
-                                console.log(n + ", " + j);
-                            }
-                        }
-                        console.log(value);
-                        if (value != undefined && !value) { // some neighbour is not occupied, OK GO!
-                            console.log("found free spot");
-                            break;
-                        }
-                        if (value == color) {
-                            break;
-                        }
-                        if (e == maxEyes -1) {
-                            console.log("[" + i + ", " + j +"] captured");
-                            positions[i][j] = false; //Should this be WC for white capture or BC black capture?
+                            player2Points++;
                         }
                     }
                 }
-
             }
         }
-             //end private
+
+        function checkCaptured(x, y) {
+            // check if placing a stone at position x,y manages to surround any of the other players stones
+            // if it does then
+            var player = enemy(positions[x][y]);
+
+            clearPositionChecked();
+            if (isBlocked(x + 1, y, player))
+                captureStones();
+            clearPositionChecked();
+            if (isBlocked(x - 1, y, player))
+                captureStones();
+            clearPositionChecked();
+            if (isBlocked(x, y + 1, player))
+                captureStones();
+            clearPositionChecked();
+            if (isBlocked(x, y - 1, player))
+                captureStones();
+        }//end private
+
 
         return {
-             play : function(pos) {
-                 console.log(pos);
-                 if (putStoneInPosition(pos)) {
+            play : function(pos) {
+                console.log(pos);
+                if (putStoneInPosition(pos)) {
+                    var currentPlayer = ""
+                    if (player1Turn) {
+                        currentPlayer = "black";
+                    } else {
+                        currentPlayer = "white";
+                    }
+                    alert("Next player: " + currentPlayer + "\nturn#: " + turnsPlayed + "\nPoints black = " + player1Points + "  white = " + player2Points)
                     console.log("played");
-                 }
-                 else {
-                     console.log("Illegal position!")
-                 }
-             },
+                }
+                else {
+                    alert("illegal move")
+                    console.log("Illegal position!")
+                }
+            },
 
-             getLegalPositions : function() {
+            getLegalPositions : function() {
                 return positions;
-             },
+            },
 
-             getStoneSize : function() {
-                 return stoneWidth;
-             }
-         }
+            getStoneSize : function() {
+                return stoneWidth;
+            }
         }
+    }
 
-         var canvas = $("#canvas");
-         var myGame = game(canvas);
+    var canvas = $("#canvas");
+    var myGame = game(canvas);
 
-         canvas.mousemove(function(e){
-             pos = getCursorPosition(this, e);
-             $("#debugger").html(pos[0] + ", " + pos[1]);
-         }).mouseup(function(e){
-             pos = getCursorPosition(this, e);
-             myGame.play(pos);
-         });
-
-
-
+    canvas.mousemove(
+            function(e) {
+                pos = getCursorPosition(this, e);
+                $("#debugger").html(pos[0] + ", " + pos[1]);
+            }).mouseup(function(e) {
+                pos = getCursorPosition(this, e);
+                myGame.play(pos);
+            });
 
 
-         function getCursorPosition(canvas, event) {
-            var x, y;
-            canoffset = $(canvas).offset();
-            x = event.clientX + document.body.scrollLeft + document.documentElement.scrollLeft - Math.floor(canoffset.left);
-            y = event.clientY + document.body.scrollTop + document.documentElement.scrollTop - Math.floor(canoffset.top) + 1;
-            //alert(x + ", " + y);
-            return [x,y];
-        }
+    function getCursorPosition(canvas, event) {
+        var x, y;
+        canoffset = $(canvas).offset();
+        x = event.clientX + document.body.scrollLeft + document.documentElement.scrollLeft - Math.floor(canoffset.left);
+        y = event.clientY + document.body.scrollTop + document.documentElement.scrollTop - Math.floor(canoffset.top) + 1;
+        //alert(x + ", " + y);
+        return [x,y];
+    }
 
-     });
-   </script>
-    <div id="debugger"></div>
-   <div id="board">
-        <canvas width="950" height="950" id="canvas" />
-    </div>
-     
- </canvas>
- </body>
- </html>
+});
+</script>
+<div id="debugger"></div>
+<div id="board">
+    <canvas width="950" height="950" id="canvas"/>
+</div>
+
+</canvas>
+</body>
+</html>
