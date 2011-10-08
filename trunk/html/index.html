@@ -289,10 +289,11 @@ $(document).ready(function() {
             var otherPlayer = enemy(player);
             // place stone for testing
             positions[x][y] = player;
-            // check if placing stone is blocked and does not capture any of the other players stones
-            if ( isBlocked(x, y, player) &&
-                 !isCaptured(x + 1, y, otherPlayer) && !isCaptured(x - 1, y, otherPlayer) &&
-                 !isCaptured(x, y + 1, otherPlayer) && !isCaptured(x, y + 1, otherPlayer) )
+            // check if placing does not capture any of the other players stones and stone is blocked
+            // OBS: order is important
+            if ( !isCaptured(x + 1, y, otherPlayer) && !isCaptured(x - 1, y, otherPlayer) &&
+                 !isCaptured(x, y + 1, otherPlayer) && !isCaptured(x, y - 1, otherPlayer) &&
+                 isBlocked(x, y, player))
                 retVal =  true; // this is suicide
 
             // remove test-stone
