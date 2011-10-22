@@ -33,6 +33,130 @@
 <script>
 $(document).ready(function() {
 
+    // GoBoard is a "class" that contains state of the board (positions) and the logic for capturing stones
+    // This logic should also run on the server side and should therefore be independant of the GUI logic
+    var GoBoard = function(size) {       
+        // private members:
+        
+        var XYoffsets = [ [1,0],[-1,0],[0,1],[0,-1] ];
+        
+        // helper functions:
+        var create2dArray = function(xsize, ysize){
+            var new2dArray = [];
+            
+            for (var i = 0; i < xsize; i++) {
+                new2dArray[i] = new Array(ysize);
+            }
+            return new2dArray;
+        }
+        var fill2dArray = function(array, fillValue){
+            for (var i = 0; i < array.length; i++) {
+                for (var j = 0; j < array[i].length; j++) {
+                    array[i][j] = fillValue;
+                }
+            }
+        }
+        var copy2dArray = function(srcArray, dstArray){
+            for (var i = 0; i < srcArray.length; i++) {
+                for (var j = 0; j < srcArray[i].length; j++) {
+                    dstArray[i][j] = srcArray[i][j];
+                }
+            }
+        }        
+        
+        var clearMarks = function(){
+            fill2dArray(positionMarked,false);
+        }
+        var removeMarkedStones = function(){ // returns number of removed stones
+            var numberOfRemovedStones = 0
+            for (var i = 0; i < boardSize; i++) {
+                for (var j = 0; j < boardSize; j++) {
+                    if (positionMarked[i][j]) {                        
+                        positions[i][j] = false; // remove stone                        
+                        numberOfRemovedStones++; // count
+                    }
+                }
+            }
+            return numberOfRemovedStones;
+        }
+        
+        function isBlocked(x, y, enemyStone) {
+            // recursive function to check if a position is blocked
+            // if the position is occupied by the the current player the surrounding positions are checked
+
+            // check if blocked by borders
+            if (x < 0 || y < 0 || x >= boardSize || y >= boardSize)
+                return true;
+            // check if position has already been marked as checked
+            if (positionMarked[x][y])
+                return true;
+            // check if position is free
+            if (positions[x][y] == false)
+                return false;
+            // check if position is blocked the other player
+            if (positions[x][y] == enemyStone)
+                return true;
+
+            // mark this position to prevent re-checking
+            positionMarked[x][y] = true;
+
+            // check surrounding positions
+            var xoff,yoff;
+            for( var i = 0; i < 4; i++){
+                [xoff,yoff] = XYoffsets[i];
+                if (!isBlocked(x + xoff, y + yoff, enemyStone))
+                    return false;
+            }
+            return true;
+        }        
+        
+        var boardSize = size; // store size parameter
+        // create empty board position matrix
+        var positions = create2dArray(boardSize,boardSize);
+        fill2dArray(positions,false);
+        // create stone marker array (used when checking for surrounded stones)
+        var positionMarked = create2dArray(boardSize,boardSize);
+        fill2dArray(positionMarked,false);
+        
+        return {
+            //public functions:
+            setPositions : function(newPositions){
+                copy2dArray(newPositions, positions);
+            },
+            getPositions : function(){
+                return positions; // OBS! positions array is passed by reference and can be altered
+            },
+            placeStone : function(x,y,stoneColor){
+                // check if position is occupied
+                if( positions[x][y] )
+                    return { legalMove : false };
+
+                // place stone
+                positions[x][y] = stoneColor;
+
+                // check if any enemy stones are captured
+                var capturedStones = 0;
+                var xoff,yoff;
+                for( var i = 0; i < 4; i++){
+                    [xoff,yoff] = XYoffsets[i];
+                    clearMarks();
+                    if (isBlocked(x + xoff, y + yoff, stoneColor))
+                        capturedStones += removeMarkedStones();
+                }
+
+                // check if suicide
+                enemyStone = (stoneColor=="W")?"B":"W";
+                clearMarks();
+                if( isBlocked(x,y,enemyStone) ){ // oh no! suicide
+                    // remove placed stone
+                    positions[x][y] = false;
+                    return { legalMove : false };
+                }
+                
+                return { legalMove : true, points : capturedStones };
+            }
+        }
+    }
     var game = function(canvas) {
         //private properties / methods:
 
@@ -46,37 +170,6 @@ $(document).ready(function() {
 
         var width = canvas.width();
         var height = canvas.height();
-
-        //init all positions to not occupied!
-        var positions = [];
-
-        for (var i = 0; i < numberOf; i++) {
-            positions[i] = new Array(numberOf);
-        }
-        for (i = 0; i < numberOf; i++) {
-            for (var j = 0; j < numberOf; j++) {
-                positions[i][j] = false;
-            }
-        }
-
-        //create positionChecked 2d array!
-        var positionChecked = []; // Used during checking for surrounded stones
-        //TODO: This should probably not be a global var!! But if we change, this needs to be passed to recursive isBlocked method
-
-        for (var i = 0; i < numberOf; i++) {
-            positionChecked[i] = new Array(numberOf);
-        }
-
-        function clearPositionChecked() {
-            for (i = 0; i < numberOf; i++) {
-                for (var j = 0; j < numberOf; j++) {
-                    positionChecked[i][j] = false;
-                }
-            }
-        }
-
-        //init all positionChecked marks to not checked!
-        clearPositionChecked();
 
         var stoneWidth = width / numberOf;
         var stoneHeigth = height / numberOf;
@@ -126,7 +219,7 @@ $(document).ready(function() {
 
         }
 
-        drawBoard(canvas, numberOf, positions);
+        
 
 
         function convertPositionToActualBoardPosition(pos, stoneWidth, stoneHeigth) {
@@ -148,20 +241,21 @@ $(document).ready(function() {
             ctx.fill();
         }
 
+        board = GoBoard(numberOf);
+        drawBoard(canvas, numberOf, board.getPositions() );
+        
         function putStoneInPosition(pos) {
             console.debug(pos[0] + "," + pos[1]);
             var x = Math.floor(pos[0] / stoneWidth);
             var y = Math.floor(pos[1] / stoneHeigth);
-            if (isLegalPosition(x, y)) {
-                // place stone
+            var currentPlayer = player1Turn?player1:player2;
+            var retVal = board.placeStone(x,y,currentPlayer)
+            if ( retVal.legalMove ) {
                 if (player1Turn) {
-                    positions[x][y] = player1;
+                    player1Points += retVal.points;
                 } else {
-                    positions[x][y] = player2;
+                    player2Points += retVal.points;
                 }
-
-                // capture stones
-                checkCaptured(x, y);
 
                 // switch turn
                 player1Turn = !player1Turn;
@@ -170,138 +264,12 @@ $(document).ready(function() {
                 }
 
                 // update screen
-                drawBoard(canvas, numberOf, positions);
+                drawBoard(canvas, numberOf, board.getPositions() );
                 return true;
             }
             return false;
         }
 
-        function isLegalPosition(x, y) {
-            console.debug(positions[x][y]);
-            //I guess we need to handle the ko rule and playing stones with no liberty too but this will do for now..
-            if  (positions[x][y]) { // check if position is occupied
-                return false;
-            }
-            if (isSuicide(x,y)) {
-                return false;
-            }
-            return true;
-        }
-
-        function enemy(player) {
-            // returns the other player
-            if (player == player1)
-                return player2;
-            else
-                return player1;
-        }
-
-        function isBlocked(x, y, player) {
-            // recursive function to check if a position is blocked
-            // if the position is occupied by the the current player the surrounding positions are checked
-
-            // check if blocked by borders
-            if (x < 0 || y < 0 || x >= numberOf || y >= numberOf)
-                return true;
-            // check if position has already been marked as checked
-            if (positionChecked[x][y])
-                return true;
-            // check if position is free
-            if (positions[x][y] == false)
-                return false;
-            // check if position is blocked the other player
-            if (positions[x][y] == enemy(player))
-                return true;
-
-            // mark this position to prevent re-checking
-            positionChecked[x][y] = true;
-
-            // check surrounding positions
-            if (!isBlocked(x - 1, y, player))
-                return false;
-            if (!isBlocked(x + 1, y, player))
-                return false;
-            if (!isBlocked(x, y - 1, player))
-                return false;
-            if (!isBlocked(x, y + 1, player))
-                return false;
-            return true;
-        }
-
-        function isCaptured(x, y, player){
-            // returns true if the stone at x,y belongs to player and is surrounded
-            clearPositionChecked();
-            if(isBlocked(x, y, player)){
-                for (i = 0; i < numberOf; i++) {
-                    for (var j = 0; j < numberOf; j++) {
-                        if(positionChecked[i][j]){
-                            return true;
-                        }
-
-                    }
-                }
-            }
-            return false;
-        }
-
-        function captureStones() {
-            // remove marked stones from board and add points to player
-            //TODO: should return points - on a need to know basis there's no need to know about players here..
-            for (var i = 0; i < numberOf; i++) {
-                for (var j = 0; j < numberOf; j++) {
-                    if (positionChecked[i][j]) {
-                        // remove stone
-                        positions[i][j] = false;
-                        // add to score
-                        if (player1Turn) {
-                            player1Points++;
-                        } else {
-                            player2Points++;
-                        }
-                    }
-                }
-            }
-        }
-
-        function checkCaptured(x, y) {
-            //TODO: rename - doCapture() or captureStones()  ??
-            // check if placing a stone at position x,y manages to surround any of the other players stones
-            // if it does then capture these..
-            var otherPlayer = enemy(positions[x][y]);
-
-            clearPositionChecked();
-            if (isBlocked(x + 1, y, otherPlayer))
-                captureStones();
-            clearPositionChecked();
-            if (isBlocked(x - 1, y, otherPlayer))
-                captureStones();
-            clearPositionChecked();
-            if (isBlocked(x, y + 1, otherPlayer))
-                captureStones();
-            clearPositionChecked();
-            if (isBlocked(x, y - 1, otherPlayer))
-                captureStones();
-        }
-
-        function isSuicide(x, y) {
-            // check if placing a stone at position x,y is suicide
-            var retVal = false;
-            var player = player1Turn?player1:player2;
-            var otherPlayer = enemy(player);
-            // place stone for testing
-            positions[x][y] = player;
-            // check if placing does not capture any of the other players stones and stone is blocked
-            // OBS: order is important
-            if ( !isCaptured(x + 1, y, otherPlayer) && !isCaptured(x - 1, y, otherPlayer) &&
-                 !isCaptured(x, y + 1, otherPlayer) && !isCaptured(x, y - 1, otherPlayer) &&
-                 isBlocked(x, y, player))  //TODO: / note: Why not use isCaptured() here?
-                retVal =  true; // this is suicide
-
-            // remove test-stone
-            positions[x][y] = false;
-
-            return retVal;
-        }
 
         function updateScoreBoard() {
             if (player1Turn) {
@@ -321,13 +289,12 @@ $(document).ready(function() {
         //end private
 
         //TODO:
-        // Refactor / clean up / rename methods according to todo comments..?
+        // Refactor / clean up 
         //  Separate game in its own file (self-contained)
         //  CSS in separate file
         //  Make a nicer GUI (Scoreboard)
         // Create mockup server ajax methods for talking with a game server
         // Create a server side..
-
 
         return {
             play : function(pos) {
