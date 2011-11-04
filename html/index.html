@@ -103,7 +103,8 @@ $(document).ready(function() {
             // check surrounding positions
             var xoff,yoff;
             for( var i = 0; i < 4; i++){
-                [xoff,yoff] = XYoffsets[i];
+                xoff = XYoffsets[i][0];
+                yoff = XYoffsets[i][1];
                 if (!isBlocked(x + xoff, y + yoff, enemyStone))
                     return false;
             }
