@@ -35,7 +35,7 @@ $(document).ready(function() {
 
     // GoBoard is a "class" that contains state of the board (positions) and the logic for capturing stones
     // This logic should also run on the server side and should therefore be independant of the GUI logic
-    var GoBoard = function(size) {       
+    var GoBoard = function(size) {
         // private members:
         
         var XYoffsets = [ [1,0],[-1,0],[0,1],[0,-1] ];
@@ -159,6 +159,7 @@ $(document).ready(function() {
     }
     var game = function(canvas) {
         //private properties / methods:
+         var debug = false;
 
         var player1 = "B", player2 = "W";
         var player1Turn = true;
@@ -245,7 +246,9 @@ $(document).ready(function() {
         drawBoard(canvas, numberOf, board.getPositions() );
         
         function putStoneInPosition(pos) {
-            console.debug(pos[0] + "," + pos[1]);
+            if (debug) {
+                console.debug(pos[0] + "," + pos[1]);
+            }
             var x = Math.floor(pos[0] / stoneWidth);
             var y = Math.floor(pos[1] / stoneHeigth);
             var currentPlayer = player1Turn?player1:player2;
@@ -298,14 +301,20 @@ $(document).ready(function() {
 
         return {
             play : function(pos) {
-                console.log(pos);
+                if (debug) {
+                    console.log(pos);
+                }
                 if (putStoneInPosition(pos)) {
                     updateScoreBoard();
-                    console.log("played");
+                    if (debug) {
+                        console.log("played");
+                    }
                 }
                 else {
                     showError("illegal move!");
-                    console.log("Illegal position!");
+                    if (debug) {
+                        console.log("Illegal position!");
+                    }
                 }
             },
 
