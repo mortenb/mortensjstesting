@@ -1,0 +1,27 @@
+#debugger {
+    display: none;
+}
+
+#error {
+    color: red;
+    height: 30px;
+}
+
+#scoreboard {
+    padding: 10px;
+    display: inline-block;
+}
+
+#black {
+    padding: 10px;
+    float: left;
+}
+
+#white {
+    padding: 10px;
+    float: right;
+}
+
+#turn {
+    padding: 10px;
+}
