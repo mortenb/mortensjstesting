@@ -1,7 +1,12 @@
 $(document).ready(function() {
 
     // GoBoard is a "class" that contains state of the board (positions) and the logic for capturing stones
-    // This logic should also run on the server side and should therefore be independant of the GUI logic
+    // This logic should also run on the server side and should therefore be independent of the GUI logic
+    //TODO:
+    // Create mockup server ajax methods for talking with a game server
+    // Create a server side..
+    //  Make a nicer GUI (Scoreboard)
+
     var GoBoard = function(size) {
         // private members:
 
@@ -258,14 +263,6 @@ $(document).ready(function() {
         }
 
         //end private
-
-        //TODO:
-        // Refactor / clean up
-        //  Separate game in its own file (self-contained)
-        //  CSS in separate file
-        //  Make a nicer GUI (Scoreboard)
-        // Create mockup server ajax methods for talking with a game server
-        // Create a server side..
 
         return {
             play : function(pos) {
