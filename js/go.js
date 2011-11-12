@@ -3,7 +3,6 @@ $(document).ready(function() {
     // GoBoard is a "class" that contains state of the board (positions) and the logic for capturing stones
     // This logic should also run on the server side and should therefore be independent of the GUI logic
     //TODO:
-    // Create mockup server ajax methods for talking with a game server
     // Create a server side..
     //  Make a nicer GUI (Scoreboard)
 
@@ -130,6 +129,7 @@ $(document).ready(function() {
             }
         }
     }
+
     var game = function(canvas) {
         //private properties / methods:
          var debug = false;
@@ -218,6 +218,31 @@ $(document).ready(function() {
         board = GoBoard(numberOf);
         drawBoard(canvas, numberOf, board.getPositions() );
 
+        function sendToServer(player, x, y) {
+            var gamedata = {
+                "player" : player,
+                "x" : x,
+                "y" : y
+            };
+            $.ajax({
+                type: "POST",
+                url: "http://localhost:9000/game/play",
+                data: gamedata,
+                beforeSend: function() {
+                    $('#ajax').text("Sending....");
+                },
+                error: function() {
+                    $("#ajax").text("Error when sending to server!");
+                },
+                success: function() {
+                    $("#ajax").text("Success!");
+                },
+                complete: function() {
+                    $("#ajax").append("...Ferdig!");
+                }
+            });
+        }
+
         function putStoneInPosition(pos) {
             if (debug) {
                 console.debug(pos[0] + "," + pos[1]);
@@ -241,6 +266,8 @@ $(document).ready(function() {
 
                 // update screen
                 drawBoard(canvas, numberOf, board.getPositions() );
+                //legal move, send to server!
+                sendToServer(currentPlayer, x, y);
                 return true;
             }
             return false;
