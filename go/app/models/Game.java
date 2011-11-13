@@ -17,12 +17,30 @@ public class Game extends Model {
     @OneToOne(mappedBy="game", cascade=CascadeType.ALL)
     public Board board;
 
-    public String player1 = "B";
-    public String player2 = "W";
-    public boolean isPlayer1Turn = true;
+    public char player1 = 'B';
+    public char player2 = 'W';
+    public boolean isPlayer1Turn;
 
     public Game(int boardSize) {
         board = new Board(this, boardSize);
+        isPlayer1Turn = true;
+    }
+
+    public boolean play(char player, int x, int y) {
+        if (isPlayer1Turn) {
+            if (player1 != player) {
+                return false;
+            }
+        } else {
+            if (player2 != player) {
+                return false;
+            }
+        }
+        if (board.play(player, x, y)) {
+            isPlayer1Turn = !isPlayer1Turn;
+            return true;
+        }
+        return false;
     }
 
 

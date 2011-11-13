@@ -22,4 +22,17 @@ public class BasicTest extends UnitTest {
         assertEquals(1, Board.count());
     }
 
+    @Test
+    public void testLegalMoves() {
+        Game g = new Game(9).save();
+        char player1 = 'B';
+        char player2 = 'W';
+        assertTrue(g.play(player1, 0, 0));
+        assertFalse(g.play(player1, 0, 0));
+        assertFalse(g.play(player2, 0, 0));
+        assertTrue(g.play(player2, 0, 1));
+        assertFalse(g.play(player1, 10, 1));
+        g.save();
+    }
+
 }
