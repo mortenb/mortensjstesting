@@ -11,6 +11,8 @@ package models;
 import javax.persistence.*;
 import play.db.jpa.*;
 
+import java.util.Calendar;
+
 @Entity
 public class Game extends Model {
 
@@ -20,10 +22,13 @@ public class Game extends Model {
     public char player1 = 'B';
     public char player2 = 'W';
     public boolean isPlayer1Turn;
+    public String player1URL;
+    public String player2URL;
 
     public Game(int boardSize) {
         board = new Board(this, boardSize);
         isPlayer1Turn = true;
+        generateGameURLs();
     }
 
     public boolean play(char player, int x, int y) {
@@ -43,5 +48,10 @@ public class Game extends Model {
         return false;
     }
 
+    public void generateGameURLs() {
+        Calendar c = Calendar.getInstance();
+        player1URL = "" + c.getTimeInMillis() + "1";
+        player2URL = "" + c.getTimeInMillis() + "2";
+    }
 
 }

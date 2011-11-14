@@ -5,7 +5,10 @@
 # Home page
 GET     /                                       Application.index
 
-POST    /game/play                              Game.play
+GET     /game/                                  Application.index
+POST    /game/play                              Application.play
+GET    /game/create                              Application.create
+GET    /game/show                              Application.show
 
 # Ignore favicon requests
 GET     /favicon.ico                            404

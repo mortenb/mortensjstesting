@@ -5,9 +5,14 @@ import models.*;
 
 public class BasicTest extends UnitTest {
 
+    Game mygame;
+    char player1 = 'B';
+    char player2 = 'W';
+
     @Before
     public void setup() {
         Fixtures.deleteDatabase();
+        mygame = new Game(9).save();
     }
 
     @Test
@@ -17,9 +22,9 @@ public class BasicTest extends UnitTest {
         assertEquals(g.board.size, 19);
         Game g2 = new Game(9).save();
         assertEquals(9, g2.board.size);
-        assertEquals(2, Board.count());
+        assertEquals(3, Board.count());
         g.delete();
-        assertEquals(1, Board.count());
+        assertEquals(2, Board.count());
     }
 
     @Test
