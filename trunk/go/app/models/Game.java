@@ -32,6 +32,7 @@ public class Game extends Model {
     }
 
     public boolean play(char player, int x, int y) {
+        System.out.println("id = " + id + " player = " + player + " ( " + x + ", " + y + ")");
         if (isPlayer1Turn) {
             if (player1 != player) {
                 return false;
@@ -43,6 +44,7 @@ public class Game extends Model {
         }
         if (board.play(player, x, y)) {
             isPlayer1Turn = !isPlayer1Turn;
+            save();
             return true;
         }
         return false;
