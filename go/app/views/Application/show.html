@@ -1,0 +1,21 @@
+#{extends 'main.html' /}
+#{set title:'Home' /}
+
+#{if flash.success}
+    <p class="success">${flash.success}</p>
+#{/if}
+#{if flash.error}
+    <p class="error">${flash.error}</p>
+#{/if}
+
+#{if game}
+    <div class="game">
+
+        ${game.board.positions}
+
+    </div>
+  #{/if}
+
+link for player 1: <a href="@{Application.show(game.id)}">Player 1</a>
+link for player 2: <a href="@{Application.show(game.id)}">Player 2</a>
+${game.player2URL}

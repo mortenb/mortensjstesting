@@ -2,13 +2,7 @@
 # This file defines all application routes (Higher priority routes first)
 # ~~~~
 
-# Home page
-GET     /                                       Application.index
 
-GET     /game/                                  Application.index
-POST    /game/play                              Application.play
-GET    /game/create                              Application.create
-GET    /game/show                              Application.show
 
 # Ignore favicon requests
 GET     /favicon.ico                            404
@@ -16,5 +10,13 @@ GET     /favicon.ico                            404
 # Map static resources from the /app/public folder to the /public path
 GET     /public/                                staticDir:public
 
+GET     /                                  Application.index
+
+GET    /play/{id}                          Application.play
+GET    /create                             Application.create
+GET    /show/{id}                          Application.show
+
 # Catch all
 *       /{controller}/{action}                  {controller}.{action}
+
+# Home page
