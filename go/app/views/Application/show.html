@@ -4,14 +4,38 @@
 #{if flash.success}
     <p class="success">${flash.success}</p>
 #{/if}
-#{if flash.error}
-    <p class="error">${flash.error}</p>
-#{/if}
 
 #{if game}
     <div class="game">
 
         ${game.board.positions}
+
+    <div id="debugger"></div>
+    <div id="ajax">
+
+    </div>
+    <div id="scoreboard">
+     <div id="black">
+         Black : <span id="blackPoints"> 0 </span> points
+     </div>
+     <div id="turn">
+         <span id="playerTurn">Black's</span> turn
+     </div>
+     <div id="white">
+         White : <span id="whitePoints"> 0 </span> points
+     </div>
+
+    </div>
+    <div id="error">
+        #{if flash.error}
+            <p class="error">${flash.error}</p>
+        #{/if}
+    </div>
+    <div id="board">
+        <canvas width="950" height="950" id="canvas"/>
+    </div>
+
+    </canvas>
 
     </div>
   #{/if}
