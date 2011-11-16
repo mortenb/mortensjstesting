@@ -3,8 +3,11 @@ $(document).ready(function() {
     // GoBoard is a "class" that contains state of the board (positions) and the logic for capturing stones
     // This logic should also run on the server side and should therefore be independent of the GUI logic
     //TODO:
-    // Create a server side..
-    //  Make a nicer GUI (Scoreboard)
+    // fix Bug in chrome
+    // Port client side logic to server..
+    // This file is a mess - ditch most client logic
+    // This file will still be a mess - rewrite and make it create canvas based on JSON from server.
+    // Make a nicer GUI (Scoreboard)
 
     var GoBoard = function(size) {
         // private members:
