@@ -130,7 +130,7 @@ $(document).ready(function() {
         }
     }
 
-    var game = function(canvas) {
+    var game = function(canvas, size) {
         //private properties / methods:
          var debug = false;
 
@@ -140,7 +140,7 @@ $(document).ready(function() {
         var player1Points = 0;
         var player2Points = 0;
 
-        var numberOf = 19;
+        var numberOf = size;
 
         var width = canvas.width();
         var height = canvas.height();
@@ -216,6 +216,7 @@ $(document).ready(function() {
         }
 
         board = GoBoard(numberOf);
+
         drawBoard(canvas, numberOf, board.getPositions() );
 
         function sendToServer(player, x, y) {
@@ -226,7 +227,7 @@ $(document).ready(function() {
             };
             $.ajax({
                 type: "POST",
-                url: "http://localhost:9000/game/play",
+                url: "http://localhost:9000/play/1",
                 data: gamedata,
                 beforeSend: function() {
                     $('#ajax').text("Sending....");
@@ -321,7 +322,7 @@ $(document).ready(function() {
     }
 
     var canvas = $("#canvas");
-    var myGame = game(canvas);
+    var myGame = game(canvas, 19);
 
     canvas.mousemove(
             function(e) {
