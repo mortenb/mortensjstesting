@@ -61,7 +61,7 @@ public class Board extends Model {
         StringBuilder board = new StringBuilder("");
         for (int i = 0; i < this.size; i++) {
             for (int j = 0; j < this.size; j++) {
-                board.append(theBoard[i][j]);
+                board.append(theBoard[j][i]);
             }
         }
         return board.toString();
@@ -82,7 +82,7 @@ public class Board extends Model {
         int k = 0;
         for (int i = 0; i < s; i++) {
             for (int j = 0; j < s; j++) {
-                board[i][j] = b[k++];
+                board[j][i] = b[k++];
             }
         }
         return board;
