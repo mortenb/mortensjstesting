@@ -14,6 +14,7 @@
         {
             var canvas = $("#canvas");
             var myGame = game(canvas, size, gameId);
+            // TODO: set active player (2 player logic)
 
             board.setPositionsFromString("${game.board.positions}");
             myGame.draw(canvas)
