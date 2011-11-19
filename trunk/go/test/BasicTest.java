@@ -36,7 +36,7 @@ public class BasicTest extends UnitTest {
         assertTrue(hei.board.positions.charAt(0) == player1);
         assertFalse(g.play(player1, 0, 0));
         assertFalse(g.play(player2, 0, 0));
-        assertTrue(g.play(player2, 0, 1));
+        assertTrue(g.play(player2, 1, 0));
         assertTrue(hei.board.positions.charAt(1) == player2);
         assertFalse(g.play(player1, 10, 1));
         g.save();

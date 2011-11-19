@@ -20,14 +20,10 @@ public class Application extends Controller {
             System.out.println("id = " + id + " player = " + player + " ( " + x + ", " + y + ")");
             if (g != null) {
                 char p = player.charAt(0);
-                if (g.play(p, x, y)) {
-                    flash.success("%s played %s %s", player, x, y);
-                } else {
-                    flash.error("Invalid move: %s played %s %s", player, x, y);
-                }
+                g.play(p, x, y);
             }
             System.out.println(player + " played! ( " + x + ", " + y + ")");
-            show(g.id);
+            load(id);
 
         }
 
@@ -45,6 +41,12 @@ public class Application extends Controller {
 //                            "board.positions"
 //                            );
 //            renderJSON(new String(gameSerializer.serialize(game)));
+        }
+
+    public static void load(Long id) {
+        Game game = Game.findById(id);
+            JSONSerializer gameSerializer = new JSONSerializer();
+            renderJSON(new String(gameSerializer.serialize(game)));
         }
 
 

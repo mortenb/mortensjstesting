@@ -45,7 +45,7 @@
             for (var i = 0; i < boardSize; i++) {
                 for (var j = 0; j < boardSize; j++) {
                     if (positionMarked[i][j]) {
-                        positions[i][j] = false; // remove stone
+                        positions[i][j] = "."; // remove stone
                         numberOfRemovedStones++; // count
                     }
                 }
@@ -64,7 +64,7 @@
             if (positionMarked[x][y])
                 return true;
             // check if position is free
-            if (positions[x][y] == false)
+            if (positions[x][y] == ".")
                 return false;
             // check if position is blocked the other player
             if (positions[x][y] == enemyStone)
@@ -87,7 +87,7 @@
         var boardSize = size; // store size parameter
         // create empty board position matrix
         var positions = create2dArray(boardSize,boardSize);
-        fill2dArray(positions,false);
+        fill2dArray(positions,".");
         // create stone marker array (used when checking for surrounded stones)
         var positionMarked = create2dArray(boardSize,boardSize);
         fill2dArray(positionMarked,false);
@@ -97,12 +97,20 @@
             setPositions : function(newPositions){
                 copy2dArray(newPositions, positions);
             },
+            setPositionsFromString : function(strPos){
+                var k = 0;
+                for (var i = 0; i < positions.length; i++) {
+                    for (var j = 0; j < positions[i].length; j++) {
+                        positions[j][i] = strPos[k++];
+                    }
+                }
+            },
             getPositions : function(){
                 return positions; // OBS! positions array is passed by reference and can be altered
             },
             placeStone : function(x,y,stoneColor){
                 // check if position is occupied
-                if( positions[x][y] )
+                if( positions[x][y] != "." )
                     return { legalMove : false };
 
                 // place stone
@@ -123,7 +131,7 @@
                 clearMarks();
                 if( isBlocked(x,y,enemyStone) ){ // oh no! suicide
                     // remove placed stone
-                    positions[x][y] = false;
+                    positions[x][y] = ".";
                     return { legalMove : false };
                 }
 
@@ -186,7 +194,7 @@
             for (i = 0; i < numberOf; i++) {
                 for (var j = 0; j < numberOf; j++) {
                     var val = positions[i][j];
-                    if (val) {
+                    if (val != ".") {
                         boardPos = convertPositionToActualBoardPosition([i,j], stoneWidth, stoneHeigth);
                         drawStone((val == "B"), boardPos[0], boardPos[1], stoneWidth / 2.5);
                     }
@@ -237,8 +245,10 @@
                 error: function() {
                     $("#ajax").text("Error when sending to server!");
                 },
-                success: function() {
+                success: function( data ) {
                     $("#ajax").text("Success!");
+                    board.setPositionsFromString(data.board.positions);
+                    drawBoard(canvas, data.board.size, board.getPositions());
                 },
                 complete: function() {
                     $("#ajax").append("...Ferdig!");
@@ -313,13 +323,10 @@
                 }
             },
 
-            getLegalPositions : function() {
-                return positions;
-            },
-
-            getStoneSize : function() {
-                return stoneWidth;
+            draw : function(canvas){
+                drawBoard(canvas,numberOf, board.getPositions());
             }
+
         }
     }
 
