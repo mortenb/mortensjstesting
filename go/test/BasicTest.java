@@ -45,21 +45,14 @@ public class BasicTest extends UnitTest {
     }
 
     @Test
-    public void testEmptyBoardToString() {
-        Game empty = new Game(9).save();
-        Game newGame = new Game(9).save();
+    public void testCaptureMoves() {
+        Game g = new Game(9).save();
+        assertTrue(g.play(player1, 0, 1));
+        assertTrue(g.play(player2, 0, 0));
+        assertTrue(g.play(player1, 1, 0));
+        assertTrue(g.board.positions.charAt(0) == '.');
 
-        //String e = empty.board.generateBoardAsString();
-
-        newGame.board.theBoard = newGame.board.generateBoardFromString(null, 9);
-
-        assertEquals(empty.board.theBoard, newGame.board.theBoard);
-
-        Game test = new Game(54).save();
-        Game test2 = new Game(19).save();
-        test2.board.theBoard = newGame.board.generateBoardFromString(null, 19);
-
-        assertEquals(test.board.theBoard, test2.board.theBoard);
+        g.save();
 
 
     }
