@@ -1,4 +1,3 @@
-$(document).ready(function() {
 
     // GoBoard is a "class" that contains state of the board (positions) and the logic for capturing stones
     // This logic should also run on the server side and should therefore be independent of the GUI logic
@@ -133,10 +132,10 @@ $(document).ready(function() {
         }
     }
 
-    var game = function(canvas, size) {
+    var game = function(canvas, size, gameId) {
         //private properties / methods:
          var debug = false;
-
+        var id = gameId;
         var player1 = "B", player2 = "W";
         var player1Turn = true;
         var turnsPlayed = 0;
@@ -230,7 +229,7 @@ $(document).ready(function() {
             };
             $.ajax({
                 type: "POST",
-                url: "http://localhost:9000/play/1",
+                url: "http://localhost:9000/play/" + id,
                 data: gamedata,
                 beforeSend: function() {
                     $('#ajax').text("Sending....");
@@ -324,24 +323,4 @@ $(document).ready(function() {
         }
     }
 
-    var canvas = $("#canvas");
-    var myGame = game(canvas, 19);
 
-    canvas.mousemove(
-            function(e) {
-                pos = getCursorPosition(this, e);
-            }).mouseup(function(e) {
-                pos = getCursorPosition(this, e);
-                myGame.play(pos);
-            });
-
-
-    function getCursorPosition(canvas, event) {
-        var x, y;
-        canoffset = $(canvas).offset();
-        x = event.clientX + document.body.scrollLeft + document.documentElement.scrollLeft - Math.floor(canoffset.left);
-        y = event.clientY + document.body.scrollTop + document.documentElement.scrollTop - Math.floor(canoffset.top) + 1;
-        return [x,y];
-    }
-
-});

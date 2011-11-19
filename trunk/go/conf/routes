@@ -14,7 +14,7 @@ GET     /                                  Application.index
 
 *    /play/{id}                          Application.play
 GET    /create                             Application.create
-GET    /show/{id}                          Application.show
+GET    /game/{id}                          Application.show
 
 # Catch all
 *       /{controller}/{action}                  {controller}.{action}

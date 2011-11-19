@@ -6,6 +6,34 @@
 #{/if}
 
 #{if game}
+    <script type="text/javascript">
+        var gameId = ${game.id};
+        var size = ${game.board.size};
+
+        $(document).ready( function()
+        {
+            var canvas = $("#canvas");
+            var myGame = game(canvas, size, gameId);
+
+            canvas.mousemove(
+                    function(e) {
+                        pos = getCursorPosition(this, e);
+                    }).mouseup(function(e) {
+                        pos = getCursorPosition(this, e);
+                        myGame.play(pos);
+                    });
+
+
+            function getCursorPosition(canvas, event) {
+                var x, y;
+                canoffset = $(canvas).offset();
+                x = event.clientX + document.body.scrollLeft + document.documentElement.scrollLeft - Math.floor(canoffset.left);
+                y = event.clientY + document.body.scrollTop + document.documentElement.scrollTop - Math.floor(canoffset.top) + 1;
+                return [x,y];
+            }
+        });
+
+    </script>
     <div class="game">
 
         ${game.board.positions}
