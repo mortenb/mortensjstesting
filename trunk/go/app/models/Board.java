@@ -15,16 +15,20 @@ import javax.persistence.*;
 @Entity
 public class Board extends Model {
 
-   @OneToOne
-   public Game game;
+    @OneToOne
+    public Game game;
 
-   public static final int MAX = 19;
-   public int size;
-   @Lob
-   public String positions;
+    private static final int[][] XYoffsets = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}};
+    public static final int MAX = 19;
+
+    public int size;
+    @Lob
+    public String positions;
 
     @Transient
-    public char[][] theBoard;
+    private char[][] theBoard;
+    @Transient
+    private boolean[][] positionMarked;
 
     public Board(Game game, int size) {
         if (size != 13 && size != 9) {
@@ -32,32 +36,57 @@ public class Board extends Model {
         }
         this.size = size;
         this.game = game;
-        this.theBoard = new char[size][size];
-        for (int i = 0; i < this.size; i++) {
-            for (int j = 0; j < this.size; j++) {
-                theBoard[i][j] = '.'; //free space
-            }
-        }
-        positions = generateBoardAsString();
+
+
+        theBoard = new char[size][size];
+        fill2dArray(theBoard, '.');
+        positions = boardToString();
     }
 
-    public boolean play(char color, int x, int y) {
-        if (size <= x || size <= y) {
+    public boolean play(char stoneColor, int x, int y) {
+        // load transient variables
+        theBoard = boardFromString(positions, this.size);
+        this.positionMarked = new boolean[size][size];
+        clearMarks();
+
+        if ( x < 0 || size <= x || y < 0 ||size <= y) {
             return false;
         }
-        theBoard = generateBoardFromString(positions, this.size);
-        Character c = theBoard[x][y];
-        if ( c.equals('.')) { //space is free
-            //should perform proper validation here..
-            theBoard[x][y] = color;
-            positions = generateBoardAsString();
-            save();
-            return true;
+
+        // check if position is occupied
+        if (theBoard[x][y] != '.')
+            return false;
+
+        // place stone
+        theBoard[x][y] = stoneColor;
+
+        // check if any enemy stones are captured
+        int capturedStones = 0;
+        int xoff, yoff;
+        for (int i = 0; i < 4; i++) {
+            xoff = XYoffsets[i][0];
+            yoff = XYoffsets[i][1];
+            clearMarks();
+            if (isBlocked(x + xoff, y + yoff, stoneColor))
+                capturedStones += removeMarkedStones();
         }
-        return false;
+
+        // check if suicide
+        char enemyStone = (stoneColor == 'W') ? 'B' : 'W';
+        clearMarks();
+        if (isBlocked(x, y, enemyStone)) { // oh no! suicide
+            // remove placed stone
+            theBoard[x][y] = '.';
+            return false;
+        }
+
+        positions = boardToString();
+        save();
+        return true; // TODO: increase score
+
     }
 
-    public String generateBoardAsString() {
+    private String boardToString() {
         StringBuilder board = new StringBuilder("");
         for (int i = 0; i < this.size; i++) {
             for (int j = 0; j < this.size; j++) {
@@ -67,7 +96,7 @@ public class Board extends Model {
         return board.toString();
     }
 
-    public char[][] generateBoardFromString(String boardString, int s) {
+    private char[][] boardFromString(String boardString, int s) {
         if (s < 1) {
             return null;
         }
@@ -87,4 +116,71 @@ public class Board extends Model {
         }
         return board;
     }
+
+    // helper functions:
+    private void fill2dArray(char[][] array, char fillValue) {
+        for (int i = 0; i < array.length; i++) {
+            for (int j = 0; j < array[i].length; j++) {
+                array[i][j] = fillValue;
+            }
+        }
+    }
+
+    private void clearMarks() {
+        for (int i = 0; i < positionMarked.length; i++) {
+            for (int j = 0; j < positionMarked[i].length; j++) {
+                positionMarked[i][j] = false;
+            }
+        }
+    }
+
+    private int removeMarkedStones() { // returns number of removed stones
+        int numberOfRemovedStones = 0;
+        for (int i = 0; i < size; i++) {
+            for (int j = 0; j < size; j++) {
+                if (positionMarked[i][j]) {
+                    theBoard[i][j] = '.'; // remove stone
+                    numberOfRemovedStones++; // count
+                }
+            }
+        }
+        return numberOfRemovedStones;
+    }
+
+    private boolean isBlocked(int x, int y, char enemyStone) {
+        // recursive function to check if a position is blocked
+        // if the position is occupied by the the current player the surrounding positions are checked
+
+        // check if blocked by borders
+        if (x < 0 || y < 0 || x >= size || y >= size)
+            return true;
+        // check if position has already been marked as checked
+        if (positionMarked[x][y])
+            return true;
+        // check if position is free
+        if (theBoard[x][y] == '.')
+            return false;
+        // check if position is blocked the other player
+        if (theBoard[x][y] == enemyStone)
+            return true;
+
+        // mark this position to prevent re-checking
+        positionMarked[x][y] = true;
+
+        // check surrounding positions
+        int xoff, yoff;
+        for (int i = 0; i < 4; i++) {
+            xoff = XYoffsets[i][0];
+            yoff = XYoffsets[i][1];
+            if (!isBlocked(x + xoff, y + yoff, enemyStone))
+                return false;
+        }
+        return true;
+    }
+
+
+
+
+
 }
+
