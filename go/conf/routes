@@ -12,7 +12,7 @@ GET     /public/                                staticDir:public
 
 GET     /                                  Application.index
 
-*    /play/{id}                          Application.play
+*    /game/play/{id}                          Application.play
 GET    /create                             Application.create
 GET    /game/{id}                          Application.show
 *    /load/{id}                          Application.load
