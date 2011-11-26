@@ -22,9 +22,9 @@ public class Application extends Controller {
             System.out.println(" playerId = " + playerId + " , id = " + id + " player = " + player + " ( " + x + ", " + y + ")");
             if (g != null) {
                 char p = player.charAt(0);
-                g.play(playerId, p, x, y);
+                g.play(playerId, x, y);
             }
-            load(id);
+            load(id, playerId);
 
         }
 
@@ -32,7 +32,6 @@ public class Application extends Controller {
             Game game = new Game(size).save();
             session.put("playerId", game.player1URL);
             show(game.id);
-
         }
 
         public static void show(Long id) {
@@ -41,6 +40,7 @@ public class Application extends Controller {
                 session.put("playerId", playerId);
             }
             Game game = Game.findById(id);
+            game.player = playerId;
             render(game);
 //            JSONSerializer gameSerializer = new JSONSerializer().include(
 //                            "isPlayer1Turn",
@@ -49,8 +49,9 @@ public class Application extends Controller {
 //            renderJSON(new String(gameSerializer.serialize(game)));
         }
 
-    public static void load(Long id) {
+    public static void load(Long id, String playerId) {
         Game game = Game.findById(id);
+        game.player = playerId;
             JSONSerializer gameSerializer = new JSONSerializer();
             renderJSON(new String(gameSerializer.serialize(game)));
         }

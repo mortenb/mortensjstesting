@@ -1,18 +1,15 @@
 
     // GoBoard is a "class" that contains state of the board (positions) and the logic for capturing stones
     // This logic should also run on the server side and should therefore be independent of the GUI logic
-    // TODO: fix Bug in chrome
     // TODO: Make a nicer GUI (Scoreboard++)
-    // TODO: 2 player game logic (wait for other player)
     // TODO: longpolling
     // TODO: websockets
 
-    var game = function(canvas, size, gameId) {
+    var game = function(canvas, size, gameId, thePlayer) {
         //private properties / methods:
         var debug = false;
         var id = gameId;
-        var player1 = "B", player2 = "W";
-        var player1Turn = true;
+        var player = thePlayer;
         var turnsPlayed = 0;
         var player1Points = 0;
         var player2Points = 0;
@@ -54,29 +51,27 @@
             var boardPos = boardCanvas.screenPosToBoardPos(pos)
             var x = boardPos[0];
             var y = boardPos[1];
-            var currentPlayer = player1Turn?player1:player2;
-            var retVal = board.placeStone(x,y,currentPlayer)
-            if ( retVal.legalMove ) {
-                if (player1Turn) {
-                    player1Points += retVal.points;
-                } else {
-                    player2Points += retVal.points;
-                }
-
-                // switch turn
-                player1Turn = !player1Turn;
-                if (player1Turn) {
-                    turnsPlayed ++;
-                }
+//            var currentPlayer = player1Turn?player1:player2;
+//            var retVal = board.placeStone(x,y,currentPlayer)
+//            if ( retVal.legalMove ) {
+//                if (player1Turn) {
+//                    player1Points += retVal.points;
+//                } else {
+//                    player2Points += retVal.points;
+//                }
+//
+//                // switch turn
+//                player1Turn = !player1Turn;
+//                if (player1Turn) {
+//                    turnsPlayed ++;
+//                }
 
                 // update screen
-                boardCanvas.draw(board.getPositions());
+                //boardCanvas.draw(board.getPositions());
                 //legal move, send to server!
-                sendToServer(currentPlayer, x, y);
+                sendToServer(player, x, y);
                 return true;
             }
-            return false;
-        }
 
 
         function updateScoreBoard() {

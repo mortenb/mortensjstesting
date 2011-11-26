@@ -9,12 +9,12 @@
     <script type="text/javascript">
         var gameId = ${game.id};
         var size = ${game.board.size};
+        var player = ${game.player};
 
         $(document).ready( function()
         {
             var canvas = $("#canvas");
-            var myGame = game(canvas, size, gameId);
-            // TODO: set active player (2 player logic)
+            var myGame = game(canvas, size, gameId, player);
 
             board.setPositionsFromString("${game.board.positions}");
             myGame.draw();

@@ -28,29 +28,28 @@ public class Game extends Model {
     @Transient
     public volatile String status;
 
+    @Transient
+    public volatile String player;
+
     public Game(int boardSize) {
         board = new Board(this, boardSize);
         isPlayer1Turn = true;
         generateGameURLs();
     }
 
-    public boolean play(String playerId, char player, int x, int y) {
-       //
-          if (player == player1 && !player1URL.equals(playerId)) {
+    public boolean play(String playerId, int x, int y) {
+       char player;
+          if (isPlayer1Turn && !player1URL.equals(playerId)) {
               status = "";
               return false;
           }
-        if (player == player2 && !player2URL.equals(playerId)) {
+        if (!isPlayer1Turn && !player2URL.equals(playerId)) {
             return false;
         }
-        if (isPlayer1Turn) {
-            if (player1 != player) {
-                return false;
-            }
-        } else {
-            if (player2 != player) {
-                return false;
-            }
+        if (player1URL.equals(playerId)) {
+            player = player1;
+        }  else {
+            player = player2;
         }
         if (board.play(player, x, y)) {
             isPlayer1Turn = !isPlayer1Turn;
