@@ -14,26 +14,32 @@ public class Application extends Controller {
 
         public static void play(Long id, @Required String player, @Required int x, @Required int y) {
             Game g = Game.findById(id);
+            String playerId = session.get("playerId");
+
             if (validation.hasErrors()) {
                 render("Application/show.html", g);
             }
-            System.out.println("id = " + id + " player = " + player + " ( " + x + ", " + y + ")");
+            System.out.println(" playerId = " + playerId + " , id = " + id + " player = " + player + " ( " + x + ", " + y + ")");
             if (g != null) {
                 char p = player.charAt(0);
-                g.play(p, x, y);
+                g.play(playerId, p, x, y);
             }
-            System.out.println(player + " played! ( " + x + ", " + y + ")");
             load(id);
 
         }
 
         public static void create(int size) {
             Game game = new Game(size).save();
+            session.put("playerId", game.player1URL);
             show(game.id);
 
         }
 
         public static void show(Long id) {
+            String playerId = params.get("playerId");
+            if (playerId != null) {
+                session.put("playerId", playerId);
+            }
             Game game = Game.findById(id);
             render(game);
 //            JSONSerializer gameSerializer = new JSONSerializer().include(
