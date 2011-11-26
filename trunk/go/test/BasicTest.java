@@ -30,15 +30,16 @@ public class BasicTest extends UnitTest {
     @Test
     public void testLegalMoves() {
         Game g = new Game(9).save();
-        assertTrue(g.play(player1, 0, 0));
+        assertTrue(g.play(g.player1URL, player1, 0, 0));
         long i = g.id;
         Game hei = Game.findById(i);
         assertTrue(hei.board.positions.charAt(0) == player1);
-        assertFalse(g.play(player1, 0, 0));
-        assertFalse(g.play(player2, 0, 0));
-        assertTrue(g.play(player2, 1, 0));
+        assertFalse(g.play(g.player1URL, player1, 0, 0));
+        assertFalse(g.play(g.player2URL, player2, 0, 0));
+        assertTrue(g.play(g.player2URL, player2, 1, 0));
         assertTrue(hei.board.positions.charAt(1) == player2);
-        assertFalse(g.play(player1, 10, 1));
+        assertFalse(g.play(g.player1URL,player1, 10, 1));
+        assertFalse(g.play(g.player2URL,player1, 6, 1));
         g.save();
 
 
@@ -47,9 +48,9 @@ public class BasicTest extends UnitTest {
     @Test
     public void testCaptureMoves() {
         Game g = new Game(9).save();
-        assertTrue(g.play(player1, 0, 1));
-        assertTrue(g.play(player2, 0, 0));
-        assertTrue(g.play(player1, 1, 0));
+        assertTrue(g.play(g.player1URL, player1, 0, 1));
+        assertTrue(g.play(g.player2URL, player2, 0, 0));
+        assertTrue(g.play(g.player1URL, player1, 1, 0));
         assertTrue(g.board.positions.charAt(0) == '.');
 
         g.save();

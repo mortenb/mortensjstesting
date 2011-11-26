@@ -2,7 +2,6 @@
     // GoBoard is a "class" that contains state of the board (positions) and the logic for capturing stones
     // This logic should also run on the server side and should therefore be independent of the GUI logic
     // TODO: fix Bug in chrome
-    // TODO: Clean up client js - divide into board.js, game.js, (board graphics)
     // TODO: Make a nicer GUI (Scoreboard++)
     // TODO: 2 player game logic (wait for other player)
     // TODO: longpolling

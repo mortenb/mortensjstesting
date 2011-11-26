@@ -25,14 +25,24 @@ public class Game extends Model {
     public String player1URL;
     public String player2URL;
 
+    @Transient
+    public volatile String status;
+
     public Game(int boardSize) {
         board = new Board(this, boardSize);
         isPlayer1Turn = true;
         generateGameURLs();
     }
 
-    public boolean play(char player, int x, int y) {
-        System.out.println("id = " + id + " player = " + player + " ( " + x + ", " + y + ")");
+    public boolean play(String playerId, char player, int x, int y) {
+       //
+          if (player == player1 && !player1URL.equals(playerId)) {
+              status = "";
+              return false;
+          }
+        if (player == player2 && !player2URL.equals(playerId)) {
+            return false;
+        }
         if (isPlayer1Turn) {
             if (player1 != player) {
                 return false;
@@ -45,6 +55,7 @@ public class Game extends Model {
         if (board.play(player, x, y)) {
             isPlayer1Turn = !isPlayer1Turn;
             save();
+            System.out.println(player + " played! ( " + x + ", " + y + ")");
             return true;
         }
         return false;

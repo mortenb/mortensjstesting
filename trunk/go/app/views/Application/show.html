@@ -41,9 +41,10 @@
     </script>
     <div class="game">
 
-        ${game.board.positions}
 
-    <div id="debugger"></div>
+
+    <div id="debugger">
+    </div>
     <div id="ajax">
 
     </div>
@@ -73,6 +74,5 @@
     </div>
   #{/if}
 
-link for player 1: <a href="@{Application.show(game.id)}">Player 1</a>
-link for player 2: <a href="@{Application.show(game.id)}">Player 2</a>
-${game.player2URL}
+link for player 1: <a href="@{Application.show(game.id)}?playerId=${game.player1URL}">Player 1</a>
+link for player 2: <a href="@{Application.show(game.id)}?playerId=${game.player2URL}">Player 2</a>
