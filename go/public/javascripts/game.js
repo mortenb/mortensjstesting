@@ -14,8 +14,8 @@
         var player1Points = 0;
         var player2Points = 0;
 
-        board = GoBoard(size);
-        boardCanvas = BoardCanvas(canvas, size);
+        var board = GoBoard(size);
+        var boardCanvas = BoardCanvas(canvas, size);
 
         function sendToServer(player, x, y) {
             var gamedata = {
@@ -114,6 +114,9 @@
 
             draw : function(){
                 boardCanvas.draw(board.getPositions());
+            },
+            setPositionsFromString : function(positions) {
+                board.setPositionsFromString(positions);
             }
 
         }
