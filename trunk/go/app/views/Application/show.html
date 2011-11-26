@@ -20,7 +20,7 @@ link for player 2: <a href="@{Application.show(game.id)}?playerId=${game.player2
             var canvas = $("#canvas");
             var myGame = game(canvas, size, gameId, player);
 
-            board.setPositionsFromString("${game.board.positions}");
+            myGame.setPositionsFromString("${game.board.positions}");
             myGame.draw();
 
 
