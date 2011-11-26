@@ -43,19 +43,19 @@ public class Board extends Model {
         positions = boardToString();
     }
 
-    public boolean play(char stoneColor, int x, int y) {
+    public int play(char stoneColor, int x, int y) {
         // load transient variables
         theBoard = boardFromString(positions, this.size);
         this.positionMarked = new boolean[size][size];
         clearMarks();
 
         if ( x < 0 || size <= x || y < 0 ||size <= y) {
-            return false;
+            return -1;
         }
 
         // check if position is occupied
         if (theBoard[x][y] != '.')
-            return false;
+            return -2;
 
         // place stone
         theBoard[x][y] = stoneColor;
@@ -77,12 +77,12 @@ public class Board extends Model {
         if (isBlocked(x, y, enemyStone)) { // oh no! suicide
             // remove placed stone
             theBoard[x][y] = '.';
-            return false;
+            return -3;
         }
 
         positions = boardToString();
         save();
-        return true; // TODO: increase score
+        return capturedStones;
 
     }
 

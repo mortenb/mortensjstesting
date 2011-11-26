@@ -5,11 +5,15 @@
     <p class="success">${flash.success}</p>
 #{/if}
 
+link for player 1: <a href="@{Application.show(game.id)}?playerId=${game.player1URL}">Player 1</a>
+link for player 2: <a href="@{Application.show(game.id)}?playerId=${game.player2URL}">Player 2</a>
+
 #{if game}
     <script type="text/javascript">
         var gameId = ${game.id};
         var size = ${game.board.size};
         var player = ${game.player};
+        var stat = ${game.myStatusCode};
 
         $(document).ready( function()
         {
@@ -44,6 +48,8 @@
 
 
     <div id="debugger">
+        ${game.myStatusCode}
+
     </div>
     <div id="ajax">
 
@@ -74,5 +80,3 @@
     </div>
   #{/if}
 
-link for player 1: <a href="@{Application.show(game.id)}?playerId=${game.player1URL}">Player 1</a>
-link for player 2: <a href="@{Application.show(game.id)}?playerId=${game.player2URL}">Player 2</a>
