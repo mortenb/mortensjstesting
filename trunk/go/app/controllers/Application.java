@@ -12,19 +12,19 @@ public class Application extends Controller {
             render();
         }
 
-        public static void play(Long id, @Required String player, @Required int x, @Required int y) {
+        public static void play(Long id, @Required int x, @Required int y) {
             Game g = Game.findById(id);
             String playerId = session.get("playerId");
 
             if (validation.hasErrors()) {
                 render("Application/show.html", g);
             }
-            System.out.println(" playerId = " + playerId + " , id = " + id + " player = " + player + " ( " + x + ", " + y + ")");
+            System.out.println(" playerId = " + playerId + " , id = " + id + " ( " + x + ", " + y + ")");
+            int res = 0;
             if (g != null) {
-                char p = player.charAt(0);
-                g.play(playerId, x, y);
+                res = g.play(playerId, x, y);
             }
-            load(id, playerId);
+            load(id, playerId, res);
 
         }
 
@@ -49,12 +49,11 @@ public class Application extends Controller {
 //            renderJSON(new String(gameSerializer.serialize(game)));
         }
 
-    public static void load(Long id, String playerId) {
+    public static void load(Long id, String playerId, int res) {
         Game game = Game.findById(id);
+        game.myStatusCode = res;
         game.player = playerId;
             JSONSerializer gameSerializer = new JSONSerializer();
             renderJSON(new String(gameSerializer.serialize(game)));
-        }
-
-
+    }
 }

@@ -35,6 +35,8 @@
                 },
                 success: function( data ) {
                     $("#ajax").text("Success!");
+                    var retVal = data.myStatusCode;
+                    $("#ajax").append(retVal);
                     board.setPositionsFromString(data.board.positions);
                     boardCanvas.draw(board.getPositions());
                 },
@@ -52,7 +54,7 @@
             var x = boardPos[0];
             var y = boardPos[1];
 //            var currentPlayer = player1Turn?player1:player2;
-//            var retVal = board.placeStone(x,y,currentPlayer)
+//            var retVal = board.placeStone(x,y,player)
 //            if ( retVal.legalMove ) {
 //                if (player1Turn) {
 //                    player1Points += retVal.points;

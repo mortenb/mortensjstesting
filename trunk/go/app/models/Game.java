@@ -29,6 +29,9 @@ public class Game extends Model {
     public volatile String status;
 
     @Transient
+    public int myStatusCode;
+
+    @Transient
     public volatile String player;
 
     public Game(int boardSize) {
@@ -37,27 +40,30 @@ public class Game extends Model {
         generateGameURLs();
     }
 
-    public boolean play(String playerId, int x, int y) {
+    public int play(String playerId, int x, int y) {
        char player;
           if (isPlayer1Turn && !player1URL.equals(playerId)) {
-              status = "";
-              return false;
+              myStatusCode = -4;
+              return myStatusCode;
           }
         if (!isPlayer1Turn && !player2URL.equals(playerId)) {
-            return false;
+            myStatusCode = -4;
+            return myStatusCode;
         }
         if (player1URL.equals(playerId)) {
             player = player1;
         }  else {
             player = player2;
         }
-        if (board.play(player, x, y)) {
+        int result = board.play(player, x, y);
+        if (result >= 0) {
             isPlayer1Turn = !isPlayer1Turn;
             save();
             System.out.println(player + " played! ( " + x + ", " + y + ")");
-            return true;
+            return result;
         }
-        return false;
+        myStatusCode = -5; //illlegal move.
+        return myStatusCode;
     }
 
     public void generateGameURLs() {
