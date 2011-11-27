@@ -2,49 +2,73 @@
 #{set title:'Home' /}
 
 #{if flash.success}
-    <p class="success">${flash.success}</p>
+<p class="success">${flash.success}</p>
 #{/if}
 
 link for player 1: <a href="@{Application.show(game.id)}?playerId=${game.player1URL}">Player 1</a>
 link for player 2: <a href="@{Application.show(game.id)}?playerId=${game.player2URL}">Player 2</a>
 
 #{if game}
-    <script type="text/javascript">
-        var gameId = ${game.id};
-        var size = ${game.board.size};
-        var player = ${game.player};
-        var stat = ${game.myStatusCode};
+<script type="text/javascript">
+    var gameId = ${game.id};
+    var size = ${game.board.size};
+    var stat = ${game.myStatusCode};
+    var isPlayer1Turn = ${game.isPlayer1Turn};
 
-        $(document).ready( function()
-        {
-            var canvas = $("#canvas");
-            var myGame = game(canvas, size, gameId, player);
+    $(document).ready(function() {
+        var canvas = $("#canvas");
+        var myGame = game(canvas, size, isPlayer1Turn);
+        myGame.setPositionsFromString("${game.board.positions}");
+        myGame.draw();
 
-            myGame.setPositionsFromString("${game.board.positions}");
-            myGame.draw();
-
-
-            canvas.mousemove(
-                    function(e) {
-                        pos = getCursorPosition(this, e);
-                    }).mouseup(function(e) {
-                        pos = getCursorPosition(this, e);
-                        myGame.play(pos);
-                    });
-
-
-            function getCursorPosition(canvas, event) {
-                var x, y;
-                canoffset = $(canvas).offset();
-                x = event.clientX + document.body.scrollLeft + document.documentElement.scrollLeft - Math.floor(canoffset.left);
-                y = event.clientY + document.body.scrollTop + document.documentElement.scrollTop - Math.floor(canoffset.top) + 1;
-                return [x,y];
-            }
+        canvas.mouseup(function(e) {
+            var pos = getCursorPosition(this, e);
+            var boardPos = myGame.screenPosToBoardPos(pos);
+            play(boardPos[0], boardPos[1]);
         });
 
-    </script>
-    <div class="game">
 
+        function getCursorPosition(canvas, event) {
+            var x, y;
+            canoffset = $(canvas).offset();
+            x = event.clientX + document.body.scrollLeft + document.documentElement.scrollLeft - Math.floor(canoffset.left);
+            y = event.clientY + document.body.scrollTop + document.documentElement.scrollTop - Math.floor(canoffset.top) + 1;
+            return [x,y];
+        }
+
+        function play(x, y) {
+            var gamedata = {
+                "x" : x,
+                "y" : y
+            };
+            $.ajax({
+                type: "POST",
+                url: "play/" + gameId,
+                data: gamedata,
+                beforeSend: function() {
+                    $('#ajax').text("Sending....");
+                },
+                error: function() {
+                    $("#ajax").text("Error when sending to server!");
+                },
+                success: function(data) {
+                    $("#ajax").text("Success!");
+                    var retVal = data.myStatusCode;
+                    $("#ajax").append(retVal);
+                    myGame = game(canvas, size, data.isPlayer1Turn);
+                    myGame.setPositionsFromString(data.board.positions);
+                    myGame.draw();
+                },
+                complete: function(data) {
+                    $("#ajax").append("...Ferdig!");
+
+                }
+            });
+        }
+    });
+
+</script>
+<div class="game">
 
 
     <div id="debugger">
@@ -55,20 +79,20 @@ link for player 2: <a href="@{Application.show(game.id)}?playerId=${game.player2
 
     </div>
     <div id="scoreboard">
-     <div id="black">
-         Black : <span id="blackPoints"> 0 </span> points
-     </div>
-     <div id="turn">
-         <span id="playerTurn">Black's</span> turn
-     </div>
-     <div id="white">
-         White : <span id="whitePoints"> 0 </span> points
-     </div>
+        <div id="black">
+            Black : <span id="blackPoints"> 0 </span> points
+        </div>
+        <div id="turn">
+            <span id="playerTurn">Black's</span> turn
+        </div>
+        <div id="white">
+            White : <span id="whitePoints"> 0 </span> points
+        </div>
 
     </div>
     <div id="error">
         #{if flash.error}
-            <p class="error">${flash.error}</p>
+        <p class="error">${flash.error}</p>
         #{/if}
     </div>
     <div id="board">
@@ -77,6 +101,6 @@ link for player 2: <a href="@{Application.show(game.id)}?playerId=${game.player2
 
     </canvas>
 
-    </div>
-  #{/if}
+</div>
+#{/if}
 

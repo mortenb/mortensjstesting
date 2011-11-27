@@ -1,50 +1,19 @@
 
-    // GoBoard is a "class" that contains state of the board (positions) and the logic for capturing stones
-    // This logic should also run on the server side and should therefore be independent of the GUI logic
     // TODO: Make a nicer GUI (Scoreboard++)
     // TODO: longpolling
     // TODO: websockets
 
-    var game = function(canvas, size, gameId, thePlayer) {
+    var game = function(canvas, size, isPlayer1Turn) {
         //private properties / methods:
         var debug = false;
-        var id = gameId;
-        var player = thePlayer;
-        var turnsPlayed = 0;
         var player1Points = 0;
         var player2Points = 0;
+        var player1Turn = isPlayer1Turn;
 
         var board = GoBoard(size);
         var boardCanvas = BoardCanvas(canvas, size);
 
-        function sendToServer(player, x, y) {
-            var gamedata = {
-                "player" : player,
-                "x" : x,
-                "y" : y
-            };
-            $.ajax({
-                type: "POST",
-                url: "play/" + id,
-                data: gamedata,
-                beforeSend: function() {
-                    $('#ajax').text("Sending....");
-                },
-                error: function() {
-                    $("#ajax").text("Error when sending to server!");
-                },
-                success: function( data ) {
-                    $("#ajax").text("Success!");
-                    var retVal = data.myStatusCode;
-                    $("#ajax").append(retVal);
-                    board.setPositionsFromString(data.board.positions);
-                    boardCanvas.draw(board.getPositions());
-                },
-                complete: function() {
-                    $("#ajax").append("...Ferdig!");
-                }
-            });
-        }
+
 
         function putStoneInPosition(pos) {
             if (debug) {
@@ -71,12 +40,12 @@
                 // update screen
                 //boardCanvas.draw(board.getPositions());
                 //legal move, send to server!
-                sendToServer(player, x, y);
+                //sendToServer(player, x, y);
                 return true;
             }
 
 
-        function updateScoreBoard() {
+        function updateScoreBoard(player1Turn) {
             if (player1Turn) {
                 currentPlayer = "Black's";
             } else {
@@ -87,6 +56,7 @@
             $("#playerTurn").text(currentPlayer);
             showError("");
         }
+
         function showError(errorMsg) {
             $("#error").text(errorMsg);
         }
@@ -99,24 +69,27 @@
                     console.log(pos);
                 }
                 if (putStoneInPosition(pos)) {
-                    updateScoreBoard();
-                    if (debug) {
-                        console.log("played");
-                    }
+                    return true;
+                    //updateScoreBoard();
                 }
                 else {
                     showError("illegal move!");
                     if (debug) {
                         console.log("Illegal position!");
                     }
+                    return false;
                 }
             },
 
             draw : function(){
                 boardCanvas.draw(board.getPositions());
+                updateScoreBoard(player1Turn);
             },
             setPositionsFromString : function(positions) {
                 board.setPositionsFromString(positions);
+            },
+            screenPosToBoardPos : function(pos) {
+                return boardCanvas.screenPosToBoardPos(pos);
             }
 
         }
