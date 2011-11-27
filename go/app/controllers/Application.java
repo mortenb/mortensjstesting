@@ -24,8 +24,8 @@ public class Application extends Controller {
             if (g != null) {
                 res = g.play(playerId, x, y);
             }
-            load(id, playerId, res);
-
+            JSONSerializer gameSerializer = new JSONSerializer();
+            renderJSON(new String(gameSerializer.serialize(g)));
         }
 
         public static void create(int size) {
@@ -40,7 +40,7 @@ public class Application extends Controller {
                 session.put("playerId", playerId);
             }
             Game game = Game.findById(id);
-            game.player = playerId;
+            game.player = session.get("playerId");
             render(game);
 //            JSONSerializer gameSerializer = new JSONSerializer().include(
 //                            "isPlayer1Turn",

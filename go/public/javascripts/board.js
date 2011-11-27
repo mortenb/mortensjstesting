@@ -1,9 +1,6 @@
 
     // GoBoard is a "class" that contains state of the board (positions) and the logic for capturing stones
     // This logic should also run on the server side and should therefore be independent of the GUI logic
-    // TODO: Make a nicer GUI (Scoreboard++)
-    // TODO: longpolling
-    // TODO: websockets
 
 var GoBoard = function(size) {
     // private members:
