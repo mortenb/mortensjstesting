@@ -45,17 +45,7 @@
             }
 
 
-        function updateScoreBoard(player1Turn) {
-            if (player1Turn) {
-                currentPlayer = "Black's";
-            } else {
-                currentPlayer = "White's";
-            }
-            $("#blackPoints").text(player1Points);
-            $("#whitePoints").text(player2Points);
-            $("#playerTurn").text(currentPlayer);
-            showError("");
-        }
+
 
         function showError(errorMsg) {
             $("#error").text(errorMsg);
@@ -83,7 +73,6 @@
 
             draw : function(){
                 boardCanvas.draw(board.getPositions());
-                updateScoreBoard(player1Turn);
             },
             setPositionsFromString : function(positions) {
                 board.setPositionsFromString(positions);

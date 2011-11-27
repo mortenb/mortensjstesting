@@ -25,7 +25,7 @@ public class Application extends Controller {
                 res = g.play(playerId, x, y);
             }
             JSONSerializer gameSerializer = new JSONSerializer();
-            renderJSON(new String(gameSerializer.serialize(g)));
+            renderJSON((gameSerializer.serialize(g)));
         }
 
         public static void create(int size) {
