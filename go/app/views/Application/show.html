@@ -14,12 +14,15 @@ link for player 2: <a href="@{Application.show(game.id)}?playerId=${game.player2
     var size = ${game.board.size};
     var stat = ${game.myStatusCode};
     var isPlayer1Turn = ${game.isPlayer1Turn};
+    var player1Points = ${game.player1Points};
+    var player2Points = ${game.player2Points};
 
     $(document).ready(function() {
         var canvas = $("#canvas");
         var myGame = game(canvas, size, isPlayer1Turn);
         myGame.setPositionsFromString("${game.board.positions}");
         myGame.draw();
+        updateScoreBoard();
 
         canvas.mouseup(function(e) {
             var pos = getCursorPosition(this, e);
@@ -57,13 +60,29 @@ link for player 2: <a href="@{Application.show(game.id)}?playerId=${game.player2
                     $("#ajax").append(retVal);
                     myGame = game(canvas, size, data.isPlayer1Turn);
                     myGame.setPositionsFromString(data.board.positions);
+                    player1Points = data.player1Points;
+                    player2Points = data.player2Points;
+                    isPlayer1Turn = data.isPlayer1Turn;
                     myGame.draw();
+                    updateScoreBoard();
                 },
                 complete: function(data) {
                     $("#ajax").append("...Ferdig!");
 
                 }
             });
+        }
+
+        function updateScoreBoard() {
+            if (isPlayer1Turn) {
+                currentPlayer = "Black's";
+            } else {
+                currentPlayer = "White's";
+            }
+            $("#blackPoints").text(player1Points);
+            $("#whitePoints").text(player2Points);
+            $("#playerTurn").text(currentPlayer);
+            $("#error").text("");
         }
     });
 

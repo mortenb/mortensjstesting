@@ -24,6 +24,8 @@ public class Game extends Model {
     public boolean isPlayer1Turn;
     public String player1URL;
     public String player2URL;
+    public int player1Points;
+    public int player2Points;
 
     @Transient
     public volatile String status;
@@ -57,6 +59,11 @@ public class Game extends Model {
         }
         int result = board.play(player, x, y);
         if (result >= 0) {
+            if (isPlayer1Turn) {
+                player1Points += result;
+            } else {
+                player2Points += result;
+            }
             isPlayer1Turn = !isPlayer1Turn;
             save();
             System.out.println(player + " played! ( " + x + ", " + y + ")");
