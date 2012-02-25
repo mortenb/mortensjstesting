@@ -17,6 +17,31 @@ link for player 2: <a href="@{Application.show(game.id)}?playerId=${game.player2
     var player1Points = ${game.player1Points};
     var player2Points = ${game.player2Points};
 
+
+    var lastReceived = 0;
+    var waitMessages = #{jsAction @waitMessages(':lastReceived', ':gameId') /}
+
+            // Retrieve new messages
+    var getMessages = function() {
+        $.ajax({
+            url: waitMessages({lastReceived: lastReceived, gameId: gameId}),
+            success: function(events) {
+                $(events).each(function() {
+                    display(this.data)
+                    lastReceived = this.id
+                })
+                getMessages()
+            },
+            dataType: 'json'
+        });
+    }
+    getMessages();
+
+    // Display a message
+    var display = function(event) {
+        $('#debugger2').append(event.text);
+    }
+
     $(document).ready(function() {
         var canvas = $("#canvas");
         var myGame = game(canvas, size, isPlayer1Turn);
@@ -92,6 +117,9 @@ link for player 2: <a href="@{Application.show(game.id)}?playerId=${game.player2
 
     <div id="debugger">
         ${game.myStatusCode}
+
+    </div>
+    <div id="debugger2">
 
     </div>
     <div id="ajax">

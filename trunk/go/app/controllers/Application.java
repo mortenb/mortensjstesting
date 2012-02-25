@@ -1,9 +1,14 @@
 package controllers;
 
+import com.google.gson.reflect.TypeToken;
 import flexjson.JSONSerializer;
 import models.Game;
+import models.GameRoom;
 import play.data.validation.Required;
+import play.libs.F;
 import play.mvc.*;
+
+import java.util.List;
 
 
 public class Application extends Controller {
@@ -20,10 +25,13 @@ public class Application extends Controller {
                 render("Application/show.html", g);
             }
             System.out.println(" playerId = " + playerId + " , id = " + id + " ( " + x + ", " + y + ")");
+
             int res = 0;
             if (g != null) {
                 res = g.play(playerId, x, y);
             }
+            GameRoom.get(id.intValue()).play(playerId, " , id = " + id + " ( " + x + ", " + y + ")");
+            System.out.println("Event should have been fired!");
             JSONSerializer gameSerializer = new JSONSerializer();
             renderJSON((gameSerializer.serialize(g)));
         }
@@ -55,5 +63,14 @@ public class Application extends Controller {
         game.player = playerId;
             JSONSerializer gameSerializer = new JSONSerializer();
             renderJSON(new String(gameSerializer.serialize(game)));
+    }
+
+    public static void waitMessages(Long lastReceived, int gameId) {
+        // Here we use continuation to suspend
+        // the execution until a new message has been received
+        System.out.println("waiting for event");
+        List messages = await(GameRoom.get(gameId).nextMessages(lastReceived, gameId));
+                System.out.println("Event received!" + messages.toString());
+        renderJSON(messages, new TypeToken<List<F.IndexedEvent<GameRoom.Event>>>() {}.getType());
     }
 }
