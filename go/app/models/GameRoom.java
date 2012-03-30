@@ -31,8 +31,8 @@ public class GameRoom {
     /**
      * A user say something on the room
      */
-    public void play(String user, String text) {
-        gameEvents.publish(new PlayerMove(user, text));
+    public void play(String user, String text, int x, int y) {
+        gameEvents.publish(new PlayerMove(user, text, x, y));
     }
     
     /**
@@ -91,11 +91,16 @@ public class GameRoom {
         
         final public String user;
         final public String text;
-        
-        public PlayerMove(String user, String text) {
+        final public int x;
+        final public int y;
+
+
+        public PlayerMove(String user, String text, int x, int y) {
             super("playermove");
             this.user = user;
             this.text = text;
+            this.x = x;
+            this.y = y;
         }
         
     }

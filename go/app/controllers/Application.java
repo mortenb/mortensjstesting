@@ -30,7 +30,7 @@ public class Application extends Controller {
             if (g != null) {
                 res = g.play(playerId, x, y);
             }
-            GameRoom.get(id.intValue()).play(playerId, " , id = " + id + " ( " + x + ", " + y + ")");
+            GameRoom.get(id.intValue()).play(playerId, " , id = " + id + " ( " + x + ", " + y + ")", x, y);
             System.out.println("Event should have been fired!");
             JSONSerializer gameSerializer = new JSONSerializer();
             renderJSON((gameSerializer.serialize(g)));
