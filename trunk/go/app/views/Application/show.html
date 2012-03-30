@@ -44,14 +44,16 @@ link for player 2: <a href="@{Application.show(game.id)}?playerId=${game.player2
 
     $(document).ready(function() {
         var canvas = $("#canvas");
-        var myGame = game(canvas, size, isPlayer1Turn);
-        myGame.setPositionsFromString("${game.board.positions}");
-        myGame.draw();
+        var boardCanvas = BoardCanvas(canvas, size);
+        var board = GoBoard(size);
+        //var myGame = game(canvas, size, isPlayer1Turn);
+        board.setPositionsFromString("${game.board.positions}");
+        boardCanvas.draw(board.getPositions());
         updateScoreBoard();
 
         canvas.mouseup(function(e) {
             var pos = getCursorPosition(this, e);
-            var boardPos = myGame.screenPosToBoardPos(pos);
+            var boardPos = boardCanvas.screenPosToBoardPos(pos);
             play(boardPos[0], boardPos[1]);
         });
 
@@ -83,12 +85,11 @@ link for player 2: <a href="@{Application.show(game.id)}?playerId=${game.player2
                     $("#ajax").text("Success!");
                     var retVal = data.myStatusCode;
                     $("#ajax").append(retVal);
-                    myGame = game(canvas, size, data.isPlayer1Turn);
-                    myGame.setPositionsFromString(data.board.positions);
+                    board.setPositionsFromString(data.board.positions);
                     player1Points = data.player1Points;
                     player2Points = data.player2Points;
                     isPlayer1Turn = data.isPlayer1Turn;
-                    myGame.draw();
+                    boardCanvas.draw(board.getPositions());
                     updateScoreBoard();
                 },
                 complete: function(data) {
