@@ -100,4 +100,3 @@ var BoardCanvas = function(canvas, size) {
     }
 }
 
-

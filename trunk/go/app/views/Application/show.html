@@ -5,69 +5,100 @@
 <p class="success">${flash.success}</p>
 #{/if}
 
-link for player 1: <a href="@{Application.show(game.id)}?playerId=${game.player1URL}">Player 1</a>
-link for player 2: <a href="@{Application.show(game.id)}?playerId=${game.player2URL}">Player 2</a>
-
 #{if game}
 <script type="text/javascript">
-    var gameId = ${game.id};
-    var size = ${game.board.size};
-    var stat = ${game.myStatusCode};
-    var isPlayer1Turn = ${game.isPlayer1Turn};
-    var player1Points = ${game.player1Points};
-    var player2Points = ${game.player2Points};
-
-
-    var lastReceived = 0;
-    var waitMessages = #{jsAction @waitMessages(':lastReceived', ':gameId') /}
-
-            // Retrieve new messages
-    var getMessages = function() {
-        $.ajax({
-            url: waitMessages({lastReceived: lastReceived, gameId: gameId}),
-            success: function(events) {
-                $(events).each(function() {
-                    display(this.data)
-                    lastReceived = this.id
-                })
-                getMessages()
-            },
-            dataType: 'json'
-        });
-    }
-    getMessages();
-
-    // Display a message
-    var display = function(event) {
-        $('#debugger2').append(event.text);
-    }
-
     $(document).ready(function() {
         var canvas = $("#canvas");
-        var boardCanvas = BoardCanvas(canvas, size);
-        var board = GoBoard(size);
-        //var myGame = game(canvas, size, isPlayer1Turn);
-        board.setPositionsFromString("${game.board.positions}");
-        boardCanvas.draw(board.getPositions());
-        updateScoreBoard();
 
-        canvas.mouseup(function(e) {
-            var pos = getCursorPosition(this, e);
-            var boardPos = boardCanvas.screenPosToBoardPos(pos);
+        var size = ${game.board.size};
+        var stat = ${game.myStatusCode};
+        var gameId = ${game.id};
+        var playerId = "${playerId}";
+        var player = '${player}'
+        var lastReceived = ${lastReceived};
+
+        var game = new Game( canvas, size );
+
+        // update game state
+        game.playerTurn = '${game.playerTurn}';
+        game.playerBlackPoints = ${game.playerBlackPoints};
+        game.playerWhitePoints = ${game.playerWhitePoints};
+        game.board.setPositionsFromString("${game.board.positions}")
+
+        game.draw();
+        updateScoreBoard();
+    
+        var waitMessages = #{jsAction @waitMessages(':lastReceived', ':playerId') /}
+    
+        // Retrieve long-polling messages
+        var getMessages = function() {
+            $.ajax({
+                url: waitMessages({lastReceived: lastReceived, playerId: playerId}),
+                success: function(events) {
+                    $(events).each(function() {
+                        handleMessage(this.data)
+                        lastReceived = this.id
+                    })
+                    getMessages()
+                },
+                dataType: 'json'
+            });
+        }
+        getMessages();
+    
+        // Handle long-polling messages
+        var handleMessage = function(msg) {
+            if (msg.type == "playermove"){
+                $('#debugger2').append(msg.type+"("+msg.x+","+msg.y+")");
+                if ( game.playerTurn == player ){
+                    alert("Error. Received move from opponent during your turn");
+                    return;
+                }
+                if (game.play(msg.x, msg.y)) {
+                    updateScoreBoard();
+                } else {
+                    alert("Error. Received illegal move from opponent!");
+                }                 
+            }
+        }
+
+
+
+       canvas.mouseup(function(e) {
+            var pos = getCursorPosition(e);
+            var boardPos = game.boardCanvas.screenPosToBoardPos(pos);
             play(boardPos[0], boardPos[1]);
         });
 
 
-        function getCursorPosition(canvas, event) {
+        function getCursorPosition(event) {
             var x, y;
-            canoffset = $(canvas).offset();
+            canoffset = canvas.offset();
             x = event.clientX + document.body.scrollLeft + document.documentElement.scrollLeft - Math.floor(canoffset.left);
             y = event.clientY + document.body.scrollTop + document.documentElement.scrollTop - Math.floor(canoffset.top) + 1;
             return [x,y];
         }
 
-        function play(x, y) {
+        function play(x,y) {
+            if ( game.playerTurn != player ){
+                alert("Not your turn!");
+                return false;
+            }
+
+            if (game.play(x,y)) {
+                updateScoreBoard();
+                submitMove(x,y);
+                return true;
+            }
+            else {
+                alert("illegal move!");
+                return false;
+            }       
+        }
+
+        function submitMove(x, y) {
             var gamedata = {
+                "playerId" : playerId,
                 "x" : x,
                 "y" : y
             };
@@ -85,12 +116,14 @@ link for player 2: <a href="@{Application.show(game.id)}?playerId=${game.player2
                     $("#ajax").text("Success!");
                     var retVal = data.myStatusCode;
                     $("#ajax").append(retVal);
-                    board.setPositionsFromString(data.board.positions);
-                    player1Points = data.player1Points;
-                    player2Points = data.player2Points;
-                    isPlayer1Turn = data.isPlayer1Turn;
-                    boardCanvas.draw(board.getPositions());
-                    updateScoreBoard();
+                    // TODO: check that server state is the same as client state
+                    // myGame = game(canvas, size, data.playerTurn);
+                    // myGame.setPositionsFromString(data.board.positions);
+                    // playerBlackPoints = data.playerBlackPoints;
+                    // playerWhitePoints = data.playerWhitePoints;
+                    // playerTurn = data.playerTurn;
+                    // myGame.draw();
+                    // updateScoreBoard();
                 },
                 complete: function(data) {
                     $("#ajax").append("...Ferdig!");
@@ -100,13 +133,13 @@ link for player 2: <a href="@{Application.show(game.id)}?playerId=${game.player2
         }
 
         function updateScoreBoard() {
-            if (isPlayer1Turn) {
+            if (game.playerTurn == 'B') {
                 currentPlayer = "Black's";
             } else {
                 currentPlayer = "White's";
             }
-            $("#blackPoints").text(player1Points);
-            $("#whitePoints").text(player2Points);
+            $("#blackPoints").text(game.playerBlackPoints);
+            $("#whitePoints").text(game.playerWhitePoints);
             $("#playerTurn").text(currentPlayer);
             $("#error").text("");
         }
@@ -114,29 +147,20 @@ link for player 2: <a href="@{Application.show(game.id)}?playerId=${game.player2
 
 </script>
 <div class="game">
-
-
-    <div id="debugger">
-        ${game.myStatusCode}
-
-    </div>
-    <div id="debugger2">
-
-    </div>
-    <div id="ajax">
-
-    </div>
     <div id="scoreboard">
-        <div id="black">
-            Black : <span id="blackPoints"> 0 </span> points
-        </div>
-        <div id="turn">
-            <span id="playerTurn">Black's</span> turn
-        </div>
-        <div id="white">
-            White : <span id="whitePoints"> 0 </span> points
-        </div>
-
+    <table border="1" bordercolor="#FFCC00" style="background-color:#FFFFCC" width="550" cellpadding="3" cellspacing="3">
+        <tr>
+    		<td><div id="black">
+                Black : <span id="blackPoints"> 0 </span> points
+            </div></td>
+    		<td><div id="turn">
+                <span id="playerTurn">Black's</span> turn
+            </div></td>
+    		<td><div id="white">
+                White : <span id="whitePoints"> 0 </span> points
+            </div></td>
+    	</tr>
+    </table>
     </div>
     <div id="error">
         #{if flash.error}
@@ -144,11 +168,22 @@ link for player 2: <a href="@{Application.show(game.id)}?playerId=${game.player2
         #{/if}
     </div>
     <div id="board">
-        <canvas width="950" height="950" id="canvas"/>
+        <canvas width="550" height="550" id="canvas"/>
     </div>
 
-    </canvas>
+    
+    <div id="ajax">
 
+    </div>
+    <div id="debugger">
+        ${game.myStatusCode}
+
+    </div>
+    <div id="debugger2">
+
+    </div>
 </div>
+link for black player: <a href="@{Application.show(game.id, game.playerBlackId )}">Black</a>
+link for white player: <a href="@{Application.show(game.id, game.playerWhiteId )}">White</a>
 #{/if}
 

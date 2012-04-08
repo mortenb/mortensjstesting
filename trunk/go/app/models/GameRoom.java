@@ -6,11 +6,10 @@ import play.libs.F.*;
 
 public class GameRoom {
 
-    // ~~~~~~~~~ Let's chat! 
 
-    final ArchivedEventStream<GameRoom.Event> gameEvents = new ArchivedEventStream<GameRoom.Event>(100);
+    final ArchivedEventStream<GameRoom.Event> gameEvents = new ArchivedEventStream<GameRoom.Event>(5);
 
-    public static HashMap<Integer, GameRoom> gameRooms = new HashMap<Integer, GameRoom>();
+    public static HashMap<String, GameRoom> gameRooms = new HashMap<String, GameRoom>();
     
     /**
      * For WebSocket, when a user join the room we return a continuous event stream
@@ -31,16 +30,25 @@ public class GameRoom {
     /**
      * A user say something on the room
      */
-    public void play(String user, String text, int x, int y) {
-        gameEvents.publish(new PlayerMove(user, text, x, y));
+    public void play(int x, int y) {
+        gameEvents.publish(new PlayerMove(x, y));
     }
     
     /**
      * For long polling, as we are sometimes disconnected, we need to pass 
      * the last event seen id, to be sure to not miss any message
      */
-    public Promise<List<IndexedEvent<GameRoom.Event>>> nextMessages(long lastReceived, int gameId) {
+    public Promise<List<IndexedEvent<GameRoom.Event>>> nextMessages(long lastReceived) {
         return gameEvents.nextEvents(lastReceived);
+    }
+
+    public long getLastPublishedEventId(){
+        List<IndexedEvent> eventList = gameEvents.availableEvents(0);
+        long lastReceived = 0;
+        if( eventList.size() > 0 ){
+            lastReceived = eventList.get(eventList.size() - 1 ).id;
+        }
+        return( lastReceived );
     }
     
     /**
@@ -89,30 +97,23 @@ public class GameRoom {
     
     public static class PlayerMove extends Event {
         
-        final public String user;
-        final public String text;
         final public int x;
         final public int y;
-
-
-        public PlayerMove(String user, String text, int x, int y) {
+        
+        public PlayerMove(int x, int y) {
             super("playermove");
-            this.user = user;
-            this.text = text;
             this.x = x;
             this.y = y;
         }
         
     }
 
-    // ~~~~~~~~~ Chat room factory
 
-    public static GameRoom get(int gameId) {
-        if(gameRooms.get(gameId) == null) {
-            gameRooms.put(gameId, new GameRoom());
+    public static GameRoom get(String playerId) {
+        if(gameRooms.get(playerId) == null) {
+            gameRooms.put(playerId, new GameRoom());
         }
-        return gameRooms.get(gameId);
+        return gameRooms.get(playerId);
     }
     
 }
-
