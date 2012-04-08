@@ -19,16 +19,12 @@ public class Game extends Model {
     @OneToOne(mappedBy="game", cascade=CascadeType.ALL)
     public Board board;
 
-    public char player1 = 'B';
-    public char player2 = 'W';
-    public boolean isPlayer1Turn;
-    public String player1URL;
-    public String player2URL;
-    public int player1Points;
-    public int player2Points;
+    public char playerTurn; // whos turn is it? 'B' or 'W'
+    public String playerBlackId;
+    public String playerWhiteId;
+    public int playerBlackPoints;
+    public int playerWhitePoints;
 
-    @Transient
-    public volatile String status;
 
     @Transient
     public int myStatusCode;
@@ -38,33 +34,34 @@ public class Game extends Model {
 
     public Game(int boardSize) {
         board = new Board(this, boardSize);
-        isPlayer1Turn = true;
-        generateGameURLs();
+        playerTurn = 'B';
+        generatePlayerIds();
     }
 
     public int play(String playerId, int x, int y) {
-       char player;
-          if (isPlayer1Turn && !player1URL.equals(playerId)) {
-              myStatusCode = -4;
+        char player;
+        if( playerBlackId.equals(playerId) ){
+            player = 'B';
+        } else if( playerWhiteId.equals(playerId) ){
+            player = 'W';
+        } else{
+              myStatusCode = -6; // unknown playerId
               return myStatusCode;
-          }
-        if (!isPlayer1Turn && !player2URL.equals(playerId)) {
-            myStatusCode = -4;
+        }
+
+        if( playerTurn != player ) {
+            myStatusCode = -4; // not your turn
             return myStatusCode;
         }
-        if (player1URL.equals(playerId)) {
-            player = player1;
-        }  else {
-            player = player2;
-        }
+
         int result = board.play(player, x, y);
         if (result >= 0) {
-            if (isPlayer1Turn) {
-                player1Points += result;
+            if (playerTurn == 'B') {
+                playerBlackPoints += result;
             } else {
-                player2Points += result;
+                playerWhitePoints += result;
             }
-            isPlayer1Turn = !isPlayer1Turn;
+            playerTurn = (playerTurn=='B') ? 'W':'B';
             save();
             System.out.println(player + " played! ( " + x + ", " + y + ")");
             return result;
@@ -73,10 +70,20 @@ public class Game extends Model {
         return myStatusCode;
     }
 
-    public void generateGameURLs() {
+    public String otherPlayerId( String playerId ){
+        if( playerBlackId.equals(playerId) ){
+            return( playerWhiteId );
+        } else if( playerWhiteId.equals(playerId) ){
+            return( playerBlackId );
+        } else{
+            return( null ); // invalid playerId
+        }
+    }
+
+    public void generatePlayerIds() {
         Calendar c = Calendar.getInstance();
-        player1URL = "" + c.getTimeInMillis() + "1";
-        player2URL = "" + c.getTimeInMillis() + "2";
+        playerBlackId = "" + c.getTimeInMillis() + "B";
+        playerWhiteId = "" + c.getTimeInMillis() + "W";
     }
 
 }

@@ -114,7 +114,8 @@ var GoBoard = function(size) {
             var capturedStones = 0;
             var xoff,yoff;
             for( var i = 0; i < 4; i++){
-                [xoff,yoff] = XYoffsets[i];
+                xoff = XYoffsets[i][0];
+                yoff = XYoffsets[i][1];
                 clearMarks();
                 if (isBlocked(x + xoff, y + yoff, stoneColor))
                     capturedStones += removeMarkedStones();
@@ -133,4 +134,3 @@ var GoBoard = function(size) {
         }
     }
 }
-

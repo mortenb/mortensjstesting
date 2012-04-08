@@ -17,9 +17,8 @@ public class Application extends Controller {
             render();
         }
 
-        public static void play(Long id, @Required int x, @Required int y) {
+        public static void play(Long id, @Required String playerId, @Required int x, @Required int y) {
             Game g = Game.findById(id);
-            String playerId = session.get("playerId");
 
             if (validation.hasErrors()) {
                 render("Application/show.html", g);
@@ -30,47 +29,36 @@ public class Application extends Controller {
             if (g != null) {
                 res = g.play(playerId, x, y);
             }
-            GameRoom.get(id.intValue()).play(playerId, " , id = " + id + " ( " + x + ", " + y + ")", x, y);
-            System.out.println("Event should have been fired!");
+            if( res >= 0 ){
+                GameRoom.get( g.otherPlayerId( playerId ) ).play(x,y);
+                System.out.println("move sent to other player!");
+            } else {
+                System.out.println("move failed!");
+            }
+
             JSONSerializer gameSerializer = new JSONSerializer();
             renderJSON((gameSerializer.serialize(g)));
         }
 
         public static void create(int size) {
             Game game = new Game(size).save();
-            session.put("playerId", game.player1URL);
-            show(game.id);
+            show(game.id, game.playerBlackId);
         }
 
-        public static void show(Long id) {
-            String playerId = params.get("playerId");
-            if (playerId != null) {
-                session.put("playerId", playerId);
-            }
+        public static void show(Long id, @Required String playerId ) {
             Game game = Game.findById(id);
-            game.player = session.get("playerId");
-            render(game);
-//            JSONSerializer gameSerializer = new JSONSerializer().include(
-//                            "isPlayer1Turn",
-//                            "board.positions"
-//                            );
-//            renderJSON(new String(gameSerializer.serialize(game)));
+            long lastReceived = GameRoom.get( playerId ).getLastPublishedEventId();
+            char player = playerId.equals(game.playerBlackId) ? 'B':'W';
+            render(game, playerId, lastReceived, player);
         }
 
-    public static void load(Long id, String playerId, int res) {
-        Game game = Game.findById(id);
-        game.myStatusCode = res;
-        game.player = playerId;
-            JSONSerializer gameSerializer = new JSONSerializer();
-            renderJSON(new String(gameSerializer.serialize(game)));
-    }
 
-    public static void waitMessages(Long lastReceived, int gameId) {
+    public static void waitMessages(Long lastReceived, String playerId) {
         // Here we use continuation to suspend
         // the execution until a new message has been received
-        System.out.println("waiting for event");
-        List messages = await(GameRoom.get(gameId).nextMessages(lastReceived, gameId));
-                System.out.println("Event received!" + messages.toString());
+        System.out.println(playerId + " waiting for event");
+        List messages = await(GameRoom.get(playerId).nextMessages( lastReceived ));
+        System.out.println(playerId + " Event received!" + messages.toString());
         renderJSON(messages, new TypeToken<List<F.IndexedEvent<GameRoom.Event>>>() {}.getType());
     }
 }

@@ -1,87 +1,34 @@
+function Game(canvas, size) {
+    this.playerBlackPoints = 0;
+    this.playerWhitePoints = 0;
+    this.playerTurn = 'B';
 
-    // TODO: Make a nicer GUI (Scoreboard++)
-    // TODO: longpolling
-    // TODO: websockets
+    this.board = GoBoard(size);
+    this.boardCanvas = BoardCanvas(canvas, size);
 
-    var game = function(canvas, size, isPlayer1Turn) {
-        //private properties / methods:
-        var debug = false;
-        var player1Points = 0;
-        var player2Points = 0;
-        var player1Turn = isPlayer1Turn;
+    this.play = function(x, y) {
 
-        var board = GoBoard(size);
-        var boardCanvas = BoardCanvas(canvas, size);
+        var retVal = this.board.placeStone(x,y,this.playerTurn)
 
+        if ( retVal.legalMove ) {
 
-
-        function putStoneInPosition(pos) {
-            if (debug) {
-                console.debug(pos[0] + "," + pos[1]);
-            }
-            var boardPos = boardCanvas.screenPosToBoardPos(pos)
-            var x = boardPos[0];
-            var y = boardPos[1];
-//            var currentPlayer = player1Turn?player1:player2;
-//            var retVal = board.placeStone(x,y,player)
-//            if ( retVal.legalMove ) {
-//                if (player1Turn) {
-//                    player1Points += retVal.points;
-//                } else {
-//                    player2Points += retVal.points;
-//                }
-//
-//                // switch turn
-//                player1Turn = !player1Turn;
-//                if (player1Turn) {
-//                    turnsPlayed ++;
-//                }
-
-                // update screen
-                //boardCanvas.draw(board.getPositions());
-                //legal move, send to server!
-                //sendToServer(player, x, y);
-                return true;
+            if ( this.playerTurn == 'B' ) {
+                this.playerBlackPoints += retVal.points;
+                this.playerTurn = 'W' // switch turn
+            } else {
+                this.playerWhitePoints += retVal.points;
+                this.playerTurn = 'B' // switch turn
             }
 
-
-
-
-        function showError(errorMsg) {
-            $("#error").text(errorMsg);
+            // update screen
+            this.boardCanvas.draw(this.board.getPositions());
+            return true;
         }
-
-        //end private
-
-        return {
-            play : function(pos) {
-                if (debug) {
-                    console.log(pos);
-                }
-                if (putStoneInPosition(pos)) {
-                    return true;
-                    //updateScoreBoard();
-                }
-                else {
-                    showError("illegal move!");
-                    if (debug) {
-                        console.log("Illegal position!");
-                    }
-                    return false;
-                }
-            },
-
-            draw : function(){
-                boardCanvas.draw(board.getPositions());
-            },
-            setPositionsFromString : function(positions) {
-                board.setPositionsFromString(positions);
-            },
-            screenPosToBoardPos : function(pos) {
-                return boardCanvas.screenPosToBoardPos(pos);
-            }
-
-        }
+        return false; // illegal move
     }
 
+    this.draw = function(){
+        this.boardCanvas.draw( this.board.getPositions() );
+    }
+}
 
