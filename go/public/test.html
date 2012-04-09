@@ -1,0 +1,172 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+        "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+
+    <script type="text/javascript" src="javascripts/jquery-1.6.4.js"> </script>
+</head>
+<style>
+    #wizard {
+        padding-bottom: 30px;
+    }
+    .wizardStep {
+        opacity: 0.5;
+        margin:  5px;
+        padding:  5px;
+        float: left;
+        background-color: #ffff99;
+        /*background-color: grey;*/
+    }
+    .wizardStep.active {
+        opacity: 1;
+        border: 1;
+    }
+    .prev {
+        margin-top: 5px;
+        float: left;
+    }
+    .next {
+        margin-top: 5px;
+        float: right;
+    }
+    .step {
+        width: 300px;
+    }
+</style>
+<body>
+<script type="text/javascript">
+    $(document).ready(function() {
+        $("form").prepend("<div id='wizard'></div>");
+        $("form h3").each(function() {
+            $("#wizard").append("<div class='wizardStep active'>" + $(this).text() + '</div>');
+        });
+        $("form .step").not(":first").append("<a class='prev' href='#'> Forrige</a>");
+        $("form .step").not(":last").append("<a class='next' href='#'> Neste</a>");
+        $("form .step").not(":first").hide();
+        $("#wizard .wizardStep").not(":first").toggleClass("active");
+
+        $("a.next").click(function() {
+            $(this).parent().hide().next().show();
+            $("#wizard .active").toggleClass("active").next().toggleClass("active");
+            return false;
+        });
+        $("a.prev").click(function() {
+            $(this).parent().hide().prev().show();
+            $("#wizard .active").toggleClass("active").prev().toggleClass("active");
+            return false;
+        })
+    });
+</script>
+<form>
+    <div class="step">
+        <h3>Personalia:</h3>
+        <table>
+            <tr>
+                <td>
+                    Fornavn:
+                </td>
+                <td>
+                   <input type="text" name="fornavn" id="fornavn" size="10" />
+                </td>
+            </tr>
+             <tr>
+                 <td>
+                     Etternavn:
+                 </td>
+                 <td>
+                  <input type="text" name="etternavn" id="etternavn" size="10" />
+                 </td>
+             </tr>
+              <tr>
+                  <td>
+                      Alder:
+                  </td>
+                  <td>
+                  <input type="text" name="alder" id="alder" size="3" />
+                  </td>
+              </tr>
+         </table>
+    </div>
+    <div class="step">
+        <h3>Interesser:</h3>
+        <table>
+            <tr>
+                <td>
+                    Programmering:
+                </td>
+                <td>
+        <input type="checkbox" value="programmering" />
+
+        </td>
+        </tr>
+            <tr>
+                <td>
+                    Soving:
+                </td>
+                <td>
+
+                    <input type="checkbox" value="soving" />
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    Dill
+                </td>
+                <td>
+                <input type="checkbox" value="dill" />
+
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    Dall
+                </td>
+                <td>
+                <input type="checkbox" value="dall" />
+
+                </td>
+            </tr>
+        </table>
+    </div>
+    <div class="step">
+        <h3>Musikk</h3>
+        <table>
+            <tr>
+                <td>
+                    Sjanger:
+                </td>
+                <td>
+                   <input type="text" name="sjanger1" id="sjanger1" size="10" />
+                </td>
+            </tr>
+             <tr>
+                 <td>
+                     Sjanger:
+                 </td>
+                 <td>
+                  <input type="text" name="sjanger2" id="sjanger2" size="10" />
+                 </td>
+             </tr>
+              <tr>
+                  <td>
+                      Sjanger:
+                  </td>
+                  <td>
+                  <input type="text" name="sjanger3" id="sjanger3" size="10" />
+                  </td>
+              </tr>
+         </table>
+
+    </div>
+    <div class="step">
+        <h3>Velg sport:</h3>
+         <select>
+        <option>Basket</option>
+        <option>Fotball</option>
+        <option>Volleyball</option>
+            </select>
+    </div>
+
+</form>
+     </body>
+  </html>
